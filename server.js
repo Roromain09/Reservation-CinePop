@@ -14,10 +14,12 @@ const app = express();
 
 // SMTP Gmail
 const transporter = nodemailer.createTransport({
-    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true, // SSL
     auth: {
         user: process.env.EMAIL,
-        pass: process.env.PASSWORD
+        pass: process.env.EMAIL_PASSWORD
     }
 });
 
