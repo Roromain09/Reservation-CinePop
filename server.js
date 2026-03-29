@@ -4,9 +4,11 @@ dns.setDefaultResultOrder("ipv4first");
 const express = require("express");
 const fs = require("fs");
 const bodyParser = require("body-parser");
-const nodemailer = require("nodemailer");
 const QRCode = require("qrcode");
 const app = express();
+
+const { Resend } = require("resend");
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 require("dotenv").config();
 
@@ -148,16 +150,9 @@ app.post("/api/valider", async (req, res) => {
 
         await browser.close();
 
-        let transporter = nodemailer.createTransport({
-            service: "gmail",
-            auth: {
-                user: process.env.EMAIL,
-                pass: process.env.PASSWORD
-            }
-        });
-
-        await transporter.sendMail({
-            from: "cinema@test.com",
+        // ✅ RESEND (remplace nodemailer)
+        await resend.emails.send({
+            from: "CinePop <onboarding@resend.dev>",
             to: resa.email,
             subject: "🎟️ Votre billet CinéPop",
             text: `Bonjour ${resa.clientName},
@@ -174,7 +169,7 @@ CinéPop`,
             attachments: [
                 {
                     filename: `ticket-${resa.id}.pdf`,
-                    content: buffer
+                    content: buffer.toString("base64")
                 }
             ]
         });
@@ -227,6 +222,7 @@ app.get("/verify", (req, res) => {
     `);
 });
 
+// ❌ REFUS
 app.post("/api/refuser", async (req, res) => {
     try {
         const { id } = req.body;
@@ -238,16 +234,9 @@ app.post("/api/refuser", async (req, res) => {
             return res.status(404).send("Réservation introuvable");
         }
 
-        let transporter = nodemailer.createTransport({
-            service: "gmail",
-            auth: {
-                user: process.env.EMAIL,
-                pass: process.env.PASSWORD
-            }
-        });
-
-        await transporter.sendMail({
-            from: "cinema@test.com",
+        // ✅ RESEND
+        await resend.emails.send({
+            from: "CinePop <onboarding@resend.dev>",
             to: resa.email,
             subject: "❌ Réservation refusée",
             text: `Bonjour ${resa.clientName},
