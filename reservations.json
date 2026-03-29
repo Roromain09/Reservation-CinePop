@@ -1,0 +1,180 @@
+[
+  {
+    "id": 1774694512445,
+    "status": "validé",
+    "clientName": "Aveline",
+    "email": "romain.aveline2505@gmail.com",
+    "filmTitle": "Zootopie 2",
+    "roomNumber": "IMAX",
+    "sessionDate": "2026-03-28",
+    "sessionTime": "21:15"
+  },
+  {
+    "id": 1774695733675,
+    "status": "validé",
+    "clientName": "Aveline",
+    "email": "romain.aveline2505@gmail.com",
+    "filmTitle": "Zootopie 2",
+    "roomNumber": "IMAX",
+    "sessionDate": "2026-05-26",
+    "sessionTime": "11:20"
+  },
+  {
+    "id": 1774695807844,
+    "status": "validé",
+    "clientName": "Aveline",
+    "email": "romain.aveline2505@gmail.com",
+    "filmTitle": "Zootopie 2",
+    "roomNumber": "IMAX",
+    "sessionDate": "2200-05-25",
+    "sessionTime": "11:25"
+  },
+  {
+    "id": 1774696136612,
+    "status": "validé",
+    "clientName": "Aveline",
+    "email": "romain.aveline2505@gmail.com",
+    "filmTitle": "Zootopie 2",
+    "roomNumber": "IMAX",
+    "sessionDate": "2025-05-25",
+    "sessionTime": "21:02"
+  },
+  {
+    "id": 1774696618971,
+    "status": "validé",
+    "clientName": "Aveline",
+    "email": "romain.aveline2505@gmail.com",
+    "filmTitle": "Zootopie 2",
+    "roomNumber": "IMAX",
+    "sessionDate": "2202-02-23",
+    "sessionTime": "14:12"
+  },
+  {
+    "id": 1774696711077,
+    "status": "validé",
+    "clientName": "Aveline",
+    "email": "romain.aveline2505@gmail.com",
+    "filmTitle": "Zootopie 2",
+    "roomNumber": "IMAX",
+    "sessionDate": "3000-05-25",
+    "sessionTime": "21:02"
+  },
+  {
+    "id": 1774700739877,
+    "status": "validé",
+    "clientName": "Aveline",
+    "email": "romain.aveline2505@gmail.com",
+    "filmTitle": "Zootopie 2",
+    "roomNumber": "IMAX",
+    "sessionDate": "2120-05-25",
+    "sessionTime": "09:59"
+  },
+  {
+    "id": 1774701606889,
+    "status": "validé",
+    "clientName": "Aveline",
+    "email": "romain.aveline2505@gmail.com",
+    "filmTitle": "Zootopie 2",
+    "roomNumber": "IMAX",
+    "sessionDate": "2026-03-28",
+    "sessionTime": "14:00"
+  },
+  {
+    "id": 1774713485753,
+    "status": "refusé",
+    "clientName": "Aveline",
+    "email": "romain.aveline2505@gmail.com",
+    "filmTitle": "Zootopie 2",
+    "roomNumber": "IMAX",
+    "sessionDate": "2026-05-25",
+    "sessionTime": "21:15"
+  },
+  {
+    "id": 1774713671934,
+    "status": "refusé",
+    "clientName": "Aveline",
+    "email": "romain.aveline2505@gmail.com",
+    "filmTitle": "Zootopie 2",
+    "roomNumber": "IMAX",
+    "sessionDate": "5775-05-04",
+    "sessionTime": "05:24"
+  },
+  {
+    "id": 1774713798197,
+    "status": "refusé",
+    "clientName": "Z",
+    "email": "romain.aveline2505@gmail.com",
+    "filmTitle": "F",
+    "roomNumber": "F",
+    "sessionDate": "2026-03-14",
+    "sessionTime": "15:14"
+  },
+  {
+    "id": 1774714716002,
+    "status": "validé",
+    "clientName": "Aveline",
+    "email": "romain.aveline2505@gmail.com",
+    "filmTitle": "Zootopie 2",
+    "roomNumber": "IMAX",
+    "peopleNumber": "2",
+    "sessionDate": "2145-05-25",
+    "sessionTime": "21:01"
+  },
+  {
+    "id": 1774714816929,
+    "status": "validé",
+    "clientName": "Aveline",
+    "email": "romain.aveline2505@gmail.com",
+    "filmTitle": "Zootopie 2",
+    "roomNumber": "IMAX",
+    "peopleNumber": "2",
+    "sessionDate": "6512-02-26",
+    "sessionTime": "21:05"
+  },
+  {
+    "id": 1774714883856,
+    "status": "validé",
+    "clientName": "Aveline",
+    "email": "romain.aveline2505@gmail.com",
+    "filmTitle": "Zootopie 2",
+    "roomNumber": "IMAX",
+    "peopleNumber": "3",
+    "sessionDate": "2009-02-05",
+    "sessionTime": "21:51"
+  },
+  {
+    "id": 1774715225446,
+    "status": "validé",
+    "clientName": "Aveline",
+    "email": "romain.aveline2505@gmail.com",
+    "filmTitle": "Zootopie 2",
+    "roomNumber": "IMAX",
+    "peopleNumber": "22",
+    "sessionDate": "5201-02-23",
+    "sessionTime": "21:20"
+  },
+  {
+    "id": 1774776881158,
+    "status": "validé",
+    "clientName": "Aveline",
+    "email": "romain.aveline2505@gmail.com",
+    "filmTitle": "Zootopie 2",
+    "roomNumber": "IMAX",
+    "peopleNumber": "3",
+    "sessionDate": "2021-10-21",
+    "sessionTime": "21:05",
+    "validatedAt": "2026-03-29T10:02:39.319Z"
+  },
+  {
+    "id": 1774778639022,
+    "status": "refusé",
+    "clientName": "Aveline",
+    "email": "romain.aveline2505@gmail.com",
+    "filmTitle": "Zootopie 2",
+    "roomNumber": "IMAX",
+    "peopleNumber": "6",
+    "sessionDate": "35453-05-05",
+    "sessionTime": "05:03",
+    "refusedAt": "2026-03-29T10:04:10.611Z"
+  }
+]
