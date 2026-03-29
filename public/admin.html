@@ -126,9 +126,10 @@ span[style*="red"] {
 <div id="list"></div>
 
 <script>
+const API_URL = "https://reservation-cinepop.onrender.com";
 async function load() {
 
-  const res = await fetch("/api/admin");
+  const res = await fetch(`${API_URL}/api/admin`);
   const data = await res.json();
 
 // 🔥 tri du plus récent au plus ancien
@@ -161,7 +162,7 @@ data.sort((a, b) => b.id - a.id);
 
 // 🔥 bouton valider
 async function valider(id) {
-  await fetch("/api/valider", {
+  await fetch(`${API_URL}/api/valider`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -173,7 +174,7 @@ async function valider(id) {
   load();
 }
 async function refuser(id) {
-  await fetch("/api/refuser", {
+  await fetch(`${API_URL}/api/refuser`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
