@@ -6,11 +6,16 @@ const fs = require("fs");
 const bodyParser = require("body-parser");
 const QRCode = require("qrcode");
 const app = express();
-
-const { Resend } = require("resend");
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 require("dotenv").config();
+const nodemailer = require("nodemailer");
+const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+        user: process.env.EMAIL,
+        pass: process.env.EMAIL_PASSWORD
+    }
+});
+
 
 console.log(process.env.EMAIL);
 console.log(process.env.PASSWORD);
@@ -154,11 +159,11 @@ app.post("/api/valider", async (req, res) => {
         await browser.close();
 
         // ✅ RESEND (remplace nodemailer)
-        await resend.emails.send({
-            from: "CinePop <onboarding@resend.dev>",
-            to: resa.email,
-            subject: "🎟️ Votre billet CinéPop",
-            text: `Bonjour ${resa.clientName},
+        await transporter.sendMail({
+    from: `"CinePop" <${process.env.EMAIL}>`,
+    to: resa.email,
+    subject: "🎟️ Votre billet CinéPop",
+    text: `Bonjour ${resa.clientName},
 
 Votre réservation pour "${resa.filmTitle}" est confirmée 🎬
 
@@ -169,25 +174,12 @@ Votre billet est en pièce jointe.
 
 Bon film 🍿
 CinéPop`,
-            attachments: [
-    {
-        filename: `ticket-${resa.id}.pdf`,
-        content: Buffer.from(buffer).toString("base64"),
-        type: "application/pdf"
-    }
-]
-        });
-
-        resa.status = "validé";
-        resa.validatedAt = new Date();
-
-        fs.writeFileSync(FILE, JSON.stringify(data, null, 2));
-
-        res.send("Ticket envoyé !");
-    } catch (err) {
-        console.error(err);
-        res.status(500).send("Erreur serveur");
-    }
+    attachments: [
+        {
+            filename: `ticket-${resa.id}.pdf`,
+            content: buffer
+        }
+    ]
 });
 
 app.get("/verify", (req, res) => {
@@ -246,18 +238,18 @@ app.post("/api/refuser", async (req, res) => {
         }
 
         // ✅ RESEND
-        await resend.emails.send({
-            from: "CinePop <onboarding@resend.dev>",
-            to: resa.email,
-            subject: "❌ Réservation refusée",
-            text: `Bonjour ${resa.clientName},
+        await transporter.sendMail({
+    from: `"CinePop" <${process.env.EMAIL}>`,
+    to: resa.email,
+    subject: "❌ Réservation refusée",
+    text: `Bonjour ${resa.clientName},
 
-Votre réservation pour "${resa.filmTitle}" le ${resa.sessionDate} à ${resa.sessionTime} n'a malheureusement pas pu être acceptée.Tentez votre chance une prochaine fois !
+Votre réservation pour "${resa.filmTitle}" le ${resa.sessionDate} à ${resa.sessionTime} n'a malheureusement pas pu être acceptée. Tentez votre chance une prochaine fois !
 
 Merci de votre compréhension.
 
 🎬 CinéPop`
-        });
+});
 
         resa.status = "refusé";
         resa.refusedAt = new Date();
@@ -268,6 +260,13 @@ Merci de votre compréhension.
     } catch (err) {
         console.error(err);
         res.status(500).send("Erreur serveur");
+    }
+});
+transporter.verify((error, success) => {
+    if (error) {
+        console.log(error);
+    } else {
+        console.log("SMTP prêt ✅");
     }
 });
 
