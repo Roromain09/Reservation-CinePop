@@ -1,6 +1,6 @@
 const dns = require("dns");
 dns.setDefaultResultOrder("ipv4first");
-
+const { DateTime } = require("luxon");
 const express = require("express");
 const fs = require("fs");
 const bodyParser = require("body-parser");
@@ -204,8 +204,15 @@ app.get("/verify", (req, res) => {
         return res.send("<h1>⏳ Ticket non validé</h1>");
     }
 
-    const now = new Date();
-    const sessionDateTime = new Date(`${resa.sessionDate} ${resa.sessionTime}`);
+    const now = DateTime.now().setZone("Europe/Paris").toJSDate();
+    const [year, month, day] = resa.sessionDate.split("-");
+const [hours, minutes] = resa.sessionTime.split(":");
+
+const sessionDateTime = DateTime.fromFormat(
+    `${resa.sessionDate} ${resa.sessionTime}`,
+    "yyyy-MM-dd HH:mm",
+    { zone: "Europe/Paris" }
+).toJSDate();
 
     const startWindow = new Date(sessionDateTime);
     startWindow.setMinutes(startWindow.getMinutes() - 30);
