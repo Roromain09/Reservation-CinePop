@@ -146,7 +146,10 @@ app.post("/api/valider", async (req, res) => {
         const page = await browser.newPage();
         await page.setContent(html);
 
-        const buffer = await page.pdf({ format: "A6" });
+        const buffer = await page.pdf({
+    format: "A6",
+    printBackground: true
+});
 
         await browser.close();
 
@@ -169,7 +172,7 @@ CinéPop`,
             attachments: [
     {
         filename: `ticket-${resa.id}.pdf`,
-        content: buffer.toString("base64"),
+        content: Buffer.from(buffer).toString("base64"),
         type: "application/pdf"
     }
 ]
