@@ -16,11 +16,16 @@ const app = express();
 const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 465,
-    secure: true, // SSL
+    secure: true,
     auth: {
         user: process.env.EMAIL,
         pass: process.env.EMAIL_PASSWORD
-    }
+    },
+    tls: {
+        rejectUnauthorized: false
+    },
+    debug: true,
+    logger: true
 });
 
 console.log(process.env.EMAIL);
