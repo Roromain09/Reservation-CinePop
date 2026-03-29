@@ -95,7 +95,7 @@ app.post("/api/valider", async (req, res) => {
             return res.status(404).send("Réservation introuvable");
         }
 
-        const BASE_URL = process.env.BASE_URL || "https://reservationcinepop.romain-aveline2505.workers.dev/";
+        const BASE_URL = process.env.BASE_URL || "https://reservation-cinepop.onrender.com";
         const qrData = `${BASE_URL}/verify?id=${resa.id}`;
         const qrCodeBase64 = await QRCode.toDataURL(qrData);
 
