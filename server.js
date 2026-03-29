@@ -95,7 +95,7 @@ app.post("/api/valider", async (req, res) => {
             return res.status(404).send("Réservation introuvable");
         }
 
-        const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
+        const BASE_URL = process.env.BASE_URL || "https://reservation-cinepop.onrender.com";
         const qrData = `${BASE_URL}/verify?id=${resa.id}`;
         const qrCodeBase64 = await QRCode.toDataURL(qrData);
 
@@ -108,7 +108,7 @@ app.post("/api/valider", async (req, res) => {
   text-align:center;
   background:#fff;
 ">
-  <h2 style="margin:0;">🎬 CINEPOP</h2>
+  <h2 style="margin:0;">TICKET CINEPOP</h2>
   <hr>
 
   <h1 style="margin:10px 0;">${resa.filmTitle}</h1>
