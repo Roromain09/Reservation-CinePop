@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>Admin - Cinéma</title>
 <style>
-/* ===== RESET ===== */
 * {
   margin: 0;
   padding: 0;
@@ -12,28 +11,24 @@
   font-family: Arial, sans-serif;
 }
 
-/* ===== BODY ===== */
 body {
   background: #0a192f;
   color: #ffffff;
   padding: 20px;
 }
 
-/* ===== TITRE ===== */
 h1 {
   text-align: center;
   color: #f5b700;
   margin-bottom: 30px;
 }
 
-/* ===== CONTAINER LIST ===== */
 #list {
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
 
-/* ===== CARD RESA ===== */
 #list > div {
   background: #112240;
   border-radius: 12px;
@@ -46,16 +41,9 @@ h1 {
   transform: translateY(-3px);
 }
 
-/* ===== TEXTES ===== */
-p {
-  margin: 5px 0;
-}
+p { margin: 5px 0; }
+b { color: #f5b700; }
 
-b {
-  color: #f5b700;
-}
-
-/* ===== BOUTONS ===== */
 button {
   margin-top: 10px;
   padding: 8px 12px;
@@ -66,7 +54,6 @@ button {
   transition: 0.2s;
 }
 
-/* bouton valider */
 button:first-of-type {
   background: #f5b700;
   color: #0a192f;
@@ -76,7 +63,6 @@ button:first-of-type:hover {
   background: #ffd84d;
 }
 
-/* bouton refuser */
 button[style*="background:red"] {
   background: #ff4d4d !important;
 }
@@ -85,61 +71,91 @@ button[style*="background:red"]:hover {
   background: #ff1a1a !important;
 }
 
-/* ===== STATUT ===== */
 span {
   display: inline-block;
   margin-top: 10px;
   font-weight: bold;
 }
 
-/* validé */
-span[style*="green"] {
-  color: #4dff88 !important;
-}
+span[style*="green"] { color: #4dff88 !important; }
+span[style*="red"] { color: #ff4d4d !important; }
 
-/* refusé */
-span[style*="red"] {
-  color: #ff4d4d !important;
-}
-
-/* ===== RESPONSIVE (petits écrans) ===== */
 @media (max-width: 600px) {
-  body {
-    padding: 10px;
-  }
+  body { padding: 10px; }
+  #list > div { padding: 12px; }
+  button { width: 100%; margin-top: 8px; }
+}
 
-  #list > div {
-    padding: 12px;
-  }
+/* 🔥 LOADER */
+#loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(10, 25, 47, 0.9);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  flex-direction: column;
+}
 
-  button {
-    width: 100%;
-    margin-top: 8px;
-  }
+.spinner {
+  border: 6px solid #ccc;
+  border-top: 6px solid #f5b700;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+}
+
+#loader p {
+  margin-top: 15px;
+  color: #f5b700;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style>
 </head>
+
 <body>
 
 <h1>🎬 Réservations</h1>
 
 <div id="list"></div>
 
+<!-- 🔥 LOADER -->
+<div id="loader">
+  <div class="spinner"></div>
+  <p>Traitement en cours...</p>
+</div>
+
 <script>
 const API_URL = "https://reservation-cinepop.onrender.com";
-async function load() {
 
+function showLoader() {
+  document.getElementById("loader").style.display = "flex";
+}
+
+function hideLoader() {
+  document.getElementById("loader").style.display = "none";
+}
+
+async function load() {
   const res = await fetch(`${API_URL}/api/admin`);
   const data = await res.json();
 
-// 🔥 tri du plus récent au plus ancien
-data.sort((a, b) => b.id - a.id);
+  data.sort((a, b) => b.id - a.id);
 
   document.getElementById("list").innerHTML =
     data.map(r => `
       <div style="border:1px solid black; margin:10px; padding:10px;">
         <p><b>Client :</b> ${r.clientName}</p>
-		<p><b>Nombre :</b> ${r.peopleNumber}</p>
+        <p><b>Nombre :</b> ${r.peopleNumber}</p>
         <p><b>Email :</b> ${r.email}</p>
         <p><b>Film :</b> ${r.filmTitle}</p>
         <p><b>Date :</b> ${r.sessionDate}</p>
@@ -147,49 +163,68 @@ data.sort((a, b) => b.id - a.id);
         <p><b>Statut :</b> ${r.status}</p>
 
         ${
-  r.status === "en attente"
-  ? `
-    <button onclick="valider(${r.id})">✅ Valider</button>
-    <button onclick="refuser(${r.id})" style="background:red;color:white;margin-left:10px;">❌ Refuser</button>
-  `
-  : r.status === "refusé"
-  ? `<span style="color:red;">❌ Refusé</span>`
-  : `<span style="color:green;">✔ Validé</span>`
-}
+          r.status === "en attente"
+          ? `
+            <button onclick="valider(${r.id})">✅ Valider</button>
+            <button onclick="refuser(${r.id})" style="background:red;color:white;margin-left:10px;">❌ Refuser</button>
+          `
+          : r.status === "refusé"
+          ? `<span style="color:red;">❌ Refusé</span>`
+          : `<span style="color:green;">✔ Validé</span>`
+        }
       </div>
     `).join("");
 }
 
-// 🔥 bouton valider
+// ✅ VALIDER
 async function valider(id) {
-  await fetch(`${API_URL}/api/valider`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ id })
-  });
+  showLoader();
 
-  alert("Ticket envoyé par mail !");
+  try {
+    const res = await fetch(`${API_URL}/api/valider`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ id })
+    });
+
+    const text = await res.text();
+    alert(text);
+  } catch (err) {
+    alert("Erreur serveur !");
+  }
+
+  hideLoader();
   load();
 }
-async function refuser(id) {
-  await fetch(`${API_URL}/api/refuser`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ id })
-  });
 
-  alert("Réservation refusée et mail envoyé !");
+// ❌ REFUSER
+async function refuser(id) {
+  showLoader();
+
+  try {
+    const res = await fetch(`${API_URL}/api/refuser`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ id })
+    });
+
+    const text = await res.text();
+    alert(text);
+  } catch (err) {
+    alert("Erreur serveur !");
+  }
+
+  hideLoader();
   load();
 }
 
 // refresh auto
 setInterval(load, 2000);
 
-// premier chargement
 load();
 </script>
 
