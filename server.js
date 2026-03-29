@@ -167,11 +167,12 @@ Votre billet est en pièce jointe.
 Bon film 🍿
 CinéPop`,
             attachments: [
-                {
-                    filename: `ticket-${resa.id}.pdf`,
-                    content: buffer.toString("base64")
-                }
-            ]
+    {
+        filename: `ticket-${resa.id}.pdf`,
+        content: buffer.toString("base64"),
+        type: "application/pdf"
+    }
+]
         });
 
         resa.status = "validé";
