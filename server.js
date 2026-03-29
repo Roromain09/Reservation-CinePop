@@ -19,7 +19,7 @@ const transporter = nodemailer.createTransport({
     secure: true,
     auth: {
         user: process.env.EMAIL,
-        pass: process.env.EMAIL_PASSWORD
+        pass: process.env.PASSWORD
     },
     family: 4 // 👈 FORCE IPv4
 });
