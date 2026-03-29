@@ -6,6 +6,8 @@ const express = require("express");
 const fs = require("fs");
 const bodyParser = require("body-parser");
 const QRCode = require("qrcode");
+const dns = require("dns");
+dns.setDefaultResultOrder("ipv4first");
 const nodemailer = require("nodemailer");
 
 require("dotenv").config();
@@ -21,11 +23,7 @@ const transporter = nodemailer.createTransport({
         user: process.env.EMAIL,
         pass: process.env.EMAIL_PASSWORD
     },
-    tls: {
-        rejectUnauthorized: false
-    },
-    debug: true,
-    logger: true
+    family: 4 // 👈 FORCE IPv4
 });
 
 console.log(process.env.EMAIL);
