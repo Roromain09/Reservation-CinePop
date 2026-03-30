@@ -15,7 +15,8 @@ const app = express();
 // SMTP Gmail
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  port: 465, // On passe sur le port 465 (plus stable sur Render)
+  port: 465,
+  family: 4,     // On passe sur le port 465 (plus stable sur Render)
   secure: true, // Obligatoire pour le port 465
   auth: {
     user: process.env.EMAIL,
