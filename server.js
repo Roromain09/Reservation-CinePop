@@ -14,15 +14,18 @@ const app = express();
 
 // SMTP Gmail
 const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false,
-	tls: {rejectUnauthorized : true},
-    auth: {
-        user: process.env.EMAIL,
-        pass: process.env.PASSWORD
-    },
-    family: 4 // 👈 FORCE IPv4
+  host: "smtp.gmail.com",
+  port: 465, // On passe sur le port 465 (plus stable sur Render)
+  secure: true, // Obligatoire pour le port 465
+  auth: {
+    user: process.env.EMAIL,
+    pass: process.env.PASSWORD,
+  },
+  connectionTimeout: 10000, // On laisse 10 secondes pour répondre
+  greetingTimeout: 5000,
+  tls: {
+    rejectUnauthorized: true
+  }
 });
 
 console.log(process.env.EMAIL);
