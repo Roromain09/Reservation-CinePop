@@ -51,7 +51,7 @@ async function sendEmailAPI({ to, subject, html, text, attachments = [] }) {
         "Content-Type: text/html; charset=UTF-8",
         "Content-Transfer-Encoding: quoted-printable",
         "",
-        html.replace(/[\u0080-\uFFFF]/g, c => `=\\u${c.charCodeAt(0).toString(16).padStart(4, "0")}`)
+        html
     ];
 
     for (let att of attachments) {
@@ -78,32 +78,6 @@ async function sendEmailAPI({ to, subject, html, text, attachments = [] }) {
         requestBody: { raw: encodedMessage }
     });
 }
-
-    for (let att of attachments) {
-        mime.push(
-            `--${boundary}`,
-            `Content-Type: application/pdf; name="${att.filename}"`,
-            "Content-Transfer-Encoding: base64",
-            `Content-Disposition: attachment; filename="${att.filename}"`,
-            "",
-            att.content.toString("base64")
-        );
-    }
-
-    mime.push(`--${boundary}--`);
-
-    const encodedMessage = Buffer.from(mime.join("\n"))
-        .toString("base64")
-        .replace(/\+/g, "-")
-        .replace(/\//g, "_")
-        .replace(/=+$/, "");
-
-    await gmail.users.messages.send({
-        userId: "me",
-        requestBody: { raw: encodedMessage }
-    });
-}
-
 // --- LOGIQUE DE NETTOYAGE ---
 function cleanOldReservations() {
     try {
