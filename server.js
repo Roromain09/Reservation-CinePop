@@ -1,6 +1,6 @@
+process.env.NODE_OPTIONS = '--dns-result-order=ipv4first';
 const dns = require("dns");
 dns.setDefaultResultOrder("ipv4first");
-
 const { DateTime } = require("luxon");
 const express = require("express");
 const fs = require("fs");
@@ -150,7 +150,7 @@ app.post("/api/valider", async (req, res) => {
 
         const transporter = await createTransporter();
         await transporter.sendMail({
-            from: `"CinéPop" <${process.env.EMAIL_USER}>`,
+            from: `"CinéPop" <${process.env.EMAIL}>`,
             to: resa.email,
             subject: "🎟️ Votre billet CinéPop",
             text: `Bonjour ${resa.clientName}, votre réservation pour "${resa.filmTitle}" est confirmée !`,
@@ -179,7 +179,7 @@ app.post("/api/refuser", async (req, res) => {
 
         const transporter = await createTransporter();
         await transporter.sendMail({
-            from: `"CinéPop" <${process.env.EMAIL_USER}>`,
+            from: `"CinéPop" <${process.env.EMAIL}>`,
             to: resa.email,
             subject: "❌ Réservation refusée",
             text: `Bonjour ${resa.clientName}, votre réservation pour "${resa.filmTitle}" a été refusée.`
