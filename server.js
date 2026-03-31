@@ -36,24 +36,32 @@ oauth2Client.setCredentials({
 });
 
 // Fonction pour créer un transporteur d'e-mail à la volée
+// Fonction pour créer un transporteur d'e-mail à la volée
 async function createTransporter() {
-    const accessToken = await oauth2Client.getAccessToken();
-    return nodemailer.createTransport({
-        host: 'smtp.gmail.com',
-        port: 443, // On utilise le port Web, pas le 465 !
-        secure: true,
-        auth: {
-            type: 'OAuth2',
-            user: process.env.EMAIL_USER,
-            clientId: process.env.CLIENT_ID,
-            clientSecret: process.env.CLIENT_SECRET,
-            refreshToken: process.env.REFRESH_TOKEN,
-            accessToken: accessToken.token,
-        },
-        tls: {
-            rejectUnauthorized: false // Aide à passer les pare-feu de Render
-        }
-    });
+    try {
+        // On récupère le token. .getAccessToken() renvoie une promesse.
+        const { token } = await oauth2Client.getAccessToken();
+        
+        return nodemailer.createTransport({
+            host: 'smtp.gmail.com',
+            port: 443, 
+            secure: true,
+            auth: {
+                type: 'OAuth2',
+                user: process.env.EMAIL, // Vérifie bien que c'est EMAIL ou EMAIL_USER sur Render
+                clientId: process.env.CLIENT_ID,
+                clientSecret: process.env.CLIENT_SECRET,
+                refreshToken: process.env.REFRESH_TOKEN,
+                accessToken: token,
+            },
+            tls: {
+                rejectUnauthorized: false 
+            }
+        });
+    } catch (err) {
+        console.error("ERREUR OAUTH2 : Impossible d'obtenir un access token", err);
+        throw err;
+    }
 }
 
 // --- LOGIQUE DE NETTOYAGE ---
