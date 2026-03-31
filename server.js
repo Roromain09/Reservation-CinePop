@@ -6,7 +6,6 @@ const express = require("express");
 const fs = require("fs");
 const bodyParser = require("body-parser");
 const QRCode = require("qrcode");
-const nodemailer = require("nodemailer");
 const { google } = require('googleapis');
 const chromium = require("@sparticuz/chromium");
 const puppeteer = require("puppeteer-core");
@@ -35,33 +34,48 @@ oauth2Client.setCredentials({
     refresh_token: process.env.REFRESH_TOKEN
 });
 
-// Fonction pour créer un transporteur d'e-mail à la volée
-// Fonction pour créer un transporteur d'e-mail à la volée
-async function createTransporter() {
-    try {
-        // On récupère le token. .getAccessToken() renvoie une promesse.
-        const { token } = await oauth2Client.getAccessToken();
-        
-        return nodemailer.createTransport({
-            host: 'smtp.gmail.com',
-            port: 443, 
-            secure: true,
-            auth: {
-                type: 'OAuth2',
-                user: process.env.EMAIL, // Vérifie bien que c'est EMAIL ou EMAIL_USER sur Render
-                clientId: process.env.CLIENT_ID,
-                clientSecret: process.env.CLIENT_SECRET,
-                refreshToken: process.env.REFRESH_TOKEN,
-                accessToken: token,
-            },
-            tls: {
-                rejectUnauthorized: false 
-            }
-        });
-    } catch (err) {
-        console.error("ERREUR OAUTH2 : Impossible d'obtenir un access token", err);
-        throw err;
+// --- ENVOI EMAIL VIA API GMAIL ---
+async function sendEmailAPI({ to, subject, html, text, attachments = [] }) {
+    const gmail = google.gmail({ version: "v1", auth: oauth2Client });
+
+    let boundary = "__boundary__";
+
+    let mime = [
+        `From: "CinéPop" <${process.env.EMAIL}>`,
+        `To: ${to}`,
+        `Subject: ${subject}`,
+        "MIME-Version: 1.0",
+        `Content-Type: multipart/mixed; boundary="${boundary}"`,
+        "",
+        `--${boundary}`,
+        "Content-Type: text/html; charset=UTF-8",
+        "",
+        html || text
+    ];
+
+    for (let att of attachments) {
+        mime.push(
+            `--${boundary}`,
+            `Content-Type: application/pdf; name="${att.filename}"`,
+            "Content-Transfer-Encoding: base64",
+            `Content-Disposition: attachment; filename="${att.filename}"`,
+            "",
+            att.content.toString("base64")
+        );
     }
+
+    mime.push(`--${boundary}--`);
+
+    const encodedMessage = Buffer.from(mime.join("\n"))
+        .toString("base64")
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_")
+        .replace(/=+$/, "");
+
+    await gmail.users.messages.send({
+        userId: "me",
+        requestBody: { raw: encodedMessage }
+    });
 }
 
 // --- LOGIQUE DE NETTOYAGE ---
@@ -156,13 +170,13 @@ app.post("/api/valider", async (req, res) => {
         const buffer = await page.pdf({ format: "A6", printBackground: true });
         await browser.close();
 
-        const transporter = await createTransporter();
-        await transporter.sendMail({
-            from: `"CinéPop" <${process.env.EMAIL}>`,
+        await sendEmailAPI({
             to: resa.email,
             subject: "🎟️ Votre billet CinéPop",
-            text: `Bonjour ${resa.clientName}, votre réservation pour "${resa.filmTitle}" est confirmée !`,
-            attachments: [{ filename: `ticket-${resa.id}.pdf`, content: buffer }]
+            html: `Bonjour ${resa.clientName}, votre réservation pour <b>${resa.filmTitle}</b> est confirmée !`,
+            attachments: [
+                { filename: `ticket-${resa.id}.pdf`, content: buffer }
+            ]
         });
 
         resa.status = "validé";
@@ -185,12 +199,10 @@ app.post("/api/refuser", async (req, res) => {
 
         if (!resa) return res.status(404).send("Réservation introuvable");
 
-        const transporter = await createTransporter();
-        await transporter.sendMail({
-            from: `"CinéPop" <${process.env.EMAIL}>`,
+        await sendEmailAPI({
             to: resa.email,
             subject: "❌ Réservation refusée",
-            text: `Bonjour ${resa.clientName}, votre réservation pour "${resa.filmTitle}" a été refusée.`
+            html: `Bonjour ${resa.clientName}, votre réservation pour <b>${resa.filmTitle}</b> a été refusée.`
         });
 
         resa.status = "refusé";
