@@ -38,20 +38,46 @@ oauth2Client.setCredentials({
 async function sendEmailAPI({ to, subject, html, text, attachments = [] }) {
     const gmail = google.gmail({ version: "v1", auth: oauth2Client });
 
-    let boundary = "__boundary__";
+    const boundary = "----=_Part_123456";
 
     let mime = [
         `From: "CinéPop" <${process.env.EMAIL}>`,
         `To: ${to}`,
-        `Subject: ${subject}`,
+        `Subject: =?UTF-8?B?${Buffer.from(subject).toString("base64")}?=`,
         "MIME-Version: 1.0",
         `Content-Type: multipart/mixed; boundary="${boundary}"`,
         "",
         `--${boundary}`,
         "Content-Type: text/html; charset=UTF-8",
+        "Content-Transfer-Encoding: quoted-printable",
         "",
-        html || text
+        html.replace(/[\u0080-\uFFFF]/g, c => `=\\u${c.charCodeAt(0).toString(16).padStart(4, "0")}`)
     ];
+
+    for (let att of attachments) {
+        mime.push(
+            `--${boundary}`,
+            `Content-Type: application/pdf; name="${att.filename}"`,
+            "Content-Transfer-Encoding: base64",
+            `Content-Disposition: attachment; filename="${att.filename}"`,
+            "",
+            att.content.toString("base64").replace(/(.{76})/g, "$1\n")
+        );
+    }
+
+    mime.push(`--${boundary}--`);
+
+    const encodedMessage = Buffer.from(mime.join("\n"))
+        .toString("base64")
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_")
+        .replace(/=+$/, "");
+
+    await gmail.users.messages.send({
+        userId: "me",
+        requestBody: { raw: encodedMessage }
+    });
+}
 
     for (let att of attachments) {
         mime.push(
