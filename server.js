@@ -51,7 +51,7 @@ async function sendEmailAPI({ to, subject, html, text, attachments = [] }) {
         "Content-Type: text/html; charset=UTF-8",
         "Content-Transfer-Encoding: quoted-printable",
         "",
-        html
+        html || text || ""
     ];
 
     for (let att of attachments) {
@@ -81,6 +81,7 @@ async function sendEmailAPI({ to, subject, html, text, attachments = [] }) {
         requestBody: { raw: encodedMessage }
     });
 }
+
 // --- LOGIQUE DE NETTOYAGE ---
 function cleanOldReservations() {
     try {
@@ -148,7 +149,7 @@ app.post("/api/valider", async (req, res) => {
         const qrData = `${BASE_URL}/verify?id=${resa.id}`;
         const qrCodeBase64 = await QRCode.toDataURL(qrData);
 
-        const html = `
+        const htmlTicket = `
         <div style="width:280px; font-family:Arial; border:2px dashed black; padding:20px; text-align:center;">
             <h2>TICKET CINEPOP</h2>
             <hr>
@@ -169,8 +170,15 @@ app.post("/api/valider", async (req, res) => {
         });
 
         const page = await browser.newPage();
-        await page.setContent(html);
-        const buffer = await page.pdf({ format: "A6", printBackground: true });
+        await page.setContent(htmlTicket, { waitUntil: "networkidle0" });
+        await page.waitForTimeout(300);
+
+        const buffer = await page.pdf({
+            width: "300px",
+            height: "500px",
+            printBackground: true
+        });
+
         await browser.close();
 
         await sendEmailAPI({
@@ -229,14 +237,20 @@ app.get("/verify", (req, res) => {
     if (resa.status !== "validé") return res.send("<h1>⏳ Ticket non validé</h1>");
 
     const now = DateTime.now().setZone("Europe/Paris").toJSDate();
-    const sessionDateTime = DateTime.fromFormat(`${resa.sessionDate} ${resa.sessionTime}`, "yyyy-MM-dd HH:mm", { zone: "Europe/Paris" }).toJSDate();
+    const sessionDateTime = DateTime.fromFormat(
+        `${resa.sessionDate} ${resa.sessionTime}`,
+        "yyyy-MM-dd HH:mm",
+        { zone: "Europe/Paris" }
+    ).toJSDate();
 
     const startWindow = new Date(sessionDateTime);
     startWindow.setMinutes(startWindow.getMinutes() - 30);
     const endWindow = new Date(sessionDateTime);
     endWindow.setMinutes(endWindow.getMinutes() + 5);
 
-    if (now < startWindow || now > endWindow) return res.send("<h1>⛔ Ticket hors créneau</h1>");
+    if (now < startWindow || now > endWindow) {
+        return res.send("<h1>⛔ Ticket hors créneau</h1>");
+    }
 
     res.send(`<h1>✅ Ticket VALIDE</h1><p>Client : ${resa.clientName}</p><p>Film : ${resa.filmTitle}</p>`);
 });
