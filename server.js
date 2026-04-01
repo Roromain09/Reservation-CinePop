@@ -55,17 +55,20 @@ async function sendEmailAPI({ to, subject, html, text, attachments = [] }) {
     ];
 
     for (let att of attachments) {
+        const base64 = att.content.toString("base64").replace(/(.{76})/g, "$1\n");
+
         mime.push(
             `--${boundary}`,
             `Content-Type: application/pdf; name="${att.filename}"`,
-            "Content-Transfer-Encoding: base64",
             `Content-Disposition: attachment; filename="${att.filename}"`,
+            "Content-Transfer-Encoding: base64",
             "",
-            att.content.toString("base64").replace(/(.{76})/g, "$1\n")
+            base64,
+            ""
         );
     }
 
-    mime.push(`--${boundary}--`);
+    mime.push(`--${boundary}--`, "");
 
     const encodedMessage = Buffer.from(mime.join("\n"))
         .toString("base64")
