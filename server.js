@@ -277,11 +277,24 @@ app.get("/verify", (req, res) => {
 
     if (resa.status !== "validé") {
         return res.send(`
-        <html><body style="font-family:Arial;text-align:center;padding-top:80px;">
-            <img src="/img/cross.png" style="width:120px;">
-            <h1 style="color:#c00;">Ticket non validé</h1>
-        </body></html>
-        `);
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+    body { font-family:Arial;text-align:center;padding-top:80px; }
+    h1 { color:#c00; }
+</style>
+</head>
+<body>
+    <audio autoplay>
+        <source src="/sounds/error.mp3" type="audio/mpeg">
+    </audio>
+
+    <img src="/img/cross.png" style="width:120px;">
+    <h1>Ticket invalide</h1>
+</body>
+</html>
+`);
     }
 
     const now = DateTime.now().setZone("Europe/Paris").toJSDate();
@@ -307,58 +320,62 @@ app.get("/verify", (req, res) => {
 
     // --- PAGE TICKET VALIDE ---
     let page = `
-    <!DOCTYPE html>
-    <html lang="fr">
-    <head>
-    <meta charset="UTF-8">
-    <title>Ticket CinéPop</title>
-    <style>
-        body {
-            background: #fff;
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            text-align: center;
-        }
-        .card {
-            padding: 40px;
-            border-radius: 12px;
-            width: 350px;
-            border: 2px solid #e0e0e0;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-        }
-        h1 {
-            color: #2ecc71;
-            font-size: 32px;
-            margin-bottom: 10px;
-        }
-        p {
-            font-size: 18px;
-            color: #333;
-            margin: 6px 0;
-        }
-        .icon {
-            width: 120px;
-            margin-bottom: 20px;
-        }
-    </style>
-    </head>
-    <body>
-        <div class="card">
-            <img src="/img/check.png" class="icon">
-            <h1>Ticket VALIDE</h1>
-            <p><b>Client :</b> ${escapeHtml(resa.clientName)}</p>
-            <p><b>Film :</b> ${escapeHtml(resa.filmTitle)}</p>
-            <p><b>Salle :</b> ${escapeHtml(resa.roomNumber)}</p>
-            <p><b>Date :</b> ${escapeHtml(resa.sessionDate)}</p>
-            <p><b>Heure :</b> ${escapeHtml(resa.sessionTime)}</p>
-        </div>
-    </body>
-    </html>
-    `;
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Ticket CinéPop</title>
+<style>
+    body {
+        background: #fff;
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        text-align: center;
+    }
+    .card {
+        padding: 40px;
+        border-radius: 12px;
+        width: 350px;
+        border: 2px solid #e0e0e0;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+    h1 {
+        color: #2ecc71;
+        font-size: 32px;
+        margin-bottom: 10px;
+    }
+    p {
+        font-size: 18px;
+        color: #333;
+        margin: 6px 0;
+    }
+    .icon {
+        width: 120px;
+        margin-bottom: 20px;
+    }
+</style>
+</head>
+<body>
+    <audio id="sound" autoplay>
+        <source src="/sounds/valid.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="card">
+        <img src="/img/check.png" class="icon">
+        <h1>Ticket VALIDE</h1>
+        <p><b>Client :</b> ${escapeHtml(resa.clientName)}</p>
+        <p><b>Film :</b> ${escapeHtml(resa.filmTitle)}</p>
+        <p><b>Salle :</b> ${escapeHtml(resa.roomNumber)}</p>
+        <p><b>Date :</b> ${escapeHtml(resa.sessionDate)}</p>
+        <p><b>Heure :</b> ${escapeHtml(resa.sessionTime)}</p>
+    </div>
+</body>
+</html>
+`;
 
     res.send(page);
 });
