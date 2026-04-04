@@ -79,6 +79,17 @@ async function sendEmailAPI({ to, subject, html, attachments = [] }) {
         requestBody: { raw: encodedMessage }
     });
 }
+
+// --- FONCTION POUR SÉCURISER LE HTML ---
+function escapeHtml(str) {
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 // --- LOGIQUE DE NETTOYAGE ---
 function cleanOldReservations() {
     try {
@@ -144,23 +155,26 @@ app.post("/api/valider", async (req, res) => {
 
         const BASE_URL = process.env.BASE_URL || "https://reservation-cinepop.onrender.com";
         const qrData = `${BASE_URL}/verify?id=${resa.id}`;
-        const qrCodeBase64 = await QRCode.toDataURL(qrData);
+
+        // QR Code buffer
+        const qrBuffer = await QRCode.toBuffer(qrData);
+        const qrBase64 = qrBuffer.toString("base64");
 
         const html = `
         <div style="width:280px; font-family:Arial; border:2px dashed black; padding:20px; text-align:center;">
             <h2>TICKET CINEPOP</h2>
             <hr>
-            <h1>${resa.filmTitle}</h1>
-            <p><b>Salle :</b> ${resa.roomNumber}</p>
-            <p><b>Date :</b> ${resa.sessionDate}</p>
-            <p><b>Heure :</b> ${resa.sessionTime}</p>
-            <p><b>Client :</b> ${resa.clientName}</p>
-            <p><b>Places :</b> ${resa.peopleNumber}</p>
-            <img src="${qrCodeBase64}" style="width:120px;" />
+            <h1>${escapeHtml(resa.filmTitle)}</h1>
+            <p><b>Salle :</b> ${escapeHtml(resa.roomNumber)}</p>
+            <p><b>Date :</b> ${escapeHtml(resa.sessionDate)}</p>
+            <p><b>Heure :</b> ${escapeHtml(resa.sessionTime)}</p>
+            <p><b>Client :</b> ${escapeHtml(resa.clientName)}</p>
+            <p><b>Places :</b> ${escapeHtml(resa.peopleNumber)}</p>
+            <img src="data:image/png;base64,${qrBase64}" style="width:120px;" />
             <p style="font-size:10px;">Ticket #${resa.id}</p>
         </div>`;
 
-        // --- LANCEMENT PUPPETEER FIABLE ---
+        // --- LANCEMENT PUPPETEER ---
         const browser = await puppeteer.launch({
             args: [...chromium.args, "--no-sandbox", "--disable-setuid-sandbox"],
             executablePath: await chromium.executablePath(),
@@ -169,12 +183,10 @@ app.post("/api/valider", async (req, res) => {
 
         const page = await browser.newPage();
 
-        // Correction Render : utiliser data:URL
         await page.goto("data:text/html," + encodeURIComponent(html), {
             waitUntil: "networkidle0"
         });
 
-        // --- GÉNÉRATION PDF ---
         const buffer = await page.pdf({
             width: "300px",
             height: "500px",
@@ -183,23 +195,17 @@ app.post("/api/valider", async (req, res) => {
 
         await browser.close();
 
-        // --- TEST 1 : Taille du PDF ---
         console.log("Taille PDF généré :", buffer.length);
-
-        // --- TEST 2 : Sauvegarde locale ---
         fs.writeFileSync("test.pdf", buffer);
-        console.log("PDF local enregistré : test.pdf");
 
-        // Si PDF trop petit → erreur
         if (buffer.length < 5000) {
             console.error("PDF trop petit → probablement corrompu");
         }
 
-        // --- ENVOI EMAIL ---
         await sendEmailAPI({
             to: resa.email,
             subject: "🎟️ Votre billet CinéPop",
-            html: `Bonjour ${resa.clientName}, votre réservation pour <b>${resa.filmTitle}</b> est confirmée !`,
+            html: `Bonjour ${escapeHtml(resa.clientName)}, votre réservation pour <b>${escapeHtml(resa.filmTitle)}</b> est confirmée !`,
             attachments: [
                 { filename: `ticket-${resa.id}.pdf`, content: buffer }
             ]
@@ -228,7 +234,7 @@ app.post("/api/refuser", async (req, res) => {
         await sendEmailAPI({
             to: resa.email,
             subject: "❌ Réservation refusée",
-            html: `Bonjour ${resa.clientName}, votre réservation pour <b>${resa.filmTitle}</b> a été refusée.`
+            html: `Bonjour ${escapeHtml(resa.clientName)}, votre réservation pour <b>${escapeHtml(resa.filmTitle)}</b> a été refusée.`
         });
 
         resa.status = "refusé";
@@ -261,7 +267,7 @@ app.get("/verify", (req, res) => {
 
     if (now < startWindow || now > endWindow) return res.send("<h1>⛔ Ticket hors créneau</h1>");
 
-    res.send(`<h1>✅ Ticket VALIDE</h1><p>Client : ${resa.clientName}</p><p>Film : ${resa.filmTitle}</p>`);
+    res.send(`<h1>✅ Ticket VALIDE</h1><p>Client : ${escapeHtml(resa.clientName)}</p><p>Film : ${escapeHtml(resa.filmTitle)}</p>`);
 });
 
 // Nettoyage automatique toutes les heures
