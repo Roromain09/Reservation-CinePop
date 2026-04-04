@@ -35,40 +35,26 @@ oauth2Client.setCredentials({
 });
 
 // --- ENVOI EMAIL VIA API GMAIL ---
+const MailComposer = require("nodemailer/lib/mail-composer");
+
 async function sendEmailAPI({ to, subject, html, attachments = [] }) {
     const gmail = google.gmail({ version: "v1", auth: oauth2Client });
 
-    const boundary = "boundary123";
+    const mail = new MailComposer({
+        from: `"CinéPop" <${process.env.EMAIL}>`,
+        to,
+        subject,
+        html,
+        attachments: attachments.map(att => ({
+            filename: att.filename,
+            content: att.content,
+            encoding: "base64"
+        }))
+    });
 
-    let mime = [
-        `From: "CinéPop" <${process.env.EMAIL}>`,
-        `To: ${to}`,
-        `Subject: =?UTF-8?B?${Buffer.from(subject).toString("base64")}?=`,
-        "MIME-Version: 1.0",
-        `Content-Type: multipart/mixed; boundary="${boundary}"`,
-        "",
-        `--${boundary}`,
-        "Content-Type: text/html; charset=UTF-8",
-        "",
-        html
-    ];
+    const message = await mail.compile().build();
 
-    for (let att of attachments) {
-        const base64 = att.content.toString("base64");
-
-        mime.push(
-            `--${boundary}`,
-            `Content-Type: application/pdf; name="${att.filename}"`,
-            `Content-Disposition: attachment; filename="${att.filename}"`,
-            "Content-Transfer-Encoding: base64",
-            "",
-            base64
-        );
-    }
-
-    mime.push(`--${boundary}--`);
-
-    const encodedMessage = Buffer.from(mime.join("\n"))
+    const encodedMessage = message
         .toString("base64")
         .replace(/\+/g, "-")
         .replace(/\//g, "_")
