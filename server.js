@@ -161,31 +161,56 @@ app.post("/api/valider", async (req, res) => {
         const qrBase64 = qrBuffer.toString("base64");
 
         const html = `
-        <div style="width:280px; font-family:Arial; border:2px dashed black; padding:20px; text-align:center;">
-            <h2>TICKET CINEPOP</h2>
-            <hr>
-            <h1>${escapeHtml(resa.filmTitle)}</h1>
-            <p><b>Salle :</b> ${escapeHtml(resa.roomNumber)}</p>
-            <p><b>Date :</b> ${escapeHtml(resa.sessionDate)}</p>
-            <p><b>Heure :</b> ${escapeHtml(resa.sessionTime)}</p>
-            <p><b>Client :</b> ${escapeHtml(resa.clientName)}</p>
-            <p><b>Places :</b> ${escapeHtml(resa.peopleNumber)}</p>
-            <img src="data:image/png;base64,${qrBase64}" style="width:120px;" />
-            <p style="font-size:10px;">Ticket #${resa.id}</p>
-        </div>`;
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+    body { font-family: Arial; }
+    .ticket {
+        width: 280px;
+        border: 2px dashed black;
+        padding: 20px;
+        text-align: center;
+        margin: 0 auto;
+    }
+</style>
+</head>
+<body>
+    <div class="ticket">
+        <h2>TICKET CINEPOP</h2>
+        <hr>
+        <h1>${escapeHtml(resa.filmTitle)}</h1>
+        <p><b>Salle :</b> ${escapeHtml(resa.roomNumber)}</p>
+        <p><b>Date :</b> ${escapeHtml(resa.sessionDate)}</p>
+        <p><b>Heure :</b> ${escapeHtml(resa.sessionTime)}</p>
+        <p><b>Client :</b> ${escapeHtml(resa.clientName)}</p>
+        <p><b>Places :</b> ${escapeHtml(resa.peopleNumber)}</p>
+        <img src="data:image/png;base64,${qrBase64}" style="width:120px;" />
+        <p style="font-size:10px;">Ticket #${resa.id}</p>
+    </div>
+</body>
+</html>
+`;
 
         // --- LANCEMENT PUPPETEER ---
         const browser = await puppeteer.launch({
-            args: [...chromium.args, "--no-sandbox", "--disable-setuid-sandbox"],
+            args: [
+                ...chromium.args,
+                "--no-sandbox",
+                "--disable-setuid-sandbox",
+                "--disable-dev-shm-usage",
+                "--disable-gpu",
+                "--single-process",
+                "--no-zygote"
+            ],
             executablePath: await chromium.executablePath(),
             headless: chromium.headless,
         });
 
         const page = await browser.newPage();
 
-        await page.goto("data:text/html," + encodeURIComponent(html), {
-            waitUntil: "networkidle0"
-        });
+        await page.setContent(html, { waitUntil: "networkidle0" });
 
         const buffer = await page.pdf({
             width: "300px",
@@ -195,11 +220,12 @@ app.post("/api/valider", async (req, res) => {
 
         await browser.close();
 
+        // TESTS
         console.log("Taille PDF généré :", buffer.length);
         fs.writeFileSync("test.pdf", buffer);
 
         if (buffer.length < 5000) {
-            console.error("PDF trop petit → probablement corrompu");
+            console.error("❌ PDF trop petit → Chromium n'a rien rendu");
         }
 
         await sendEmailAPI({
