@@ -35,10 +35,10 @@ oauth2Client.setCredentials({
 });
 
 // --- ENVOI EMAIL VIA API GMAIL ---
-async function sendEmailAPI({ to, subject, html, text, attachments = [] }) {
+async function sendEmailAPI({ to, subject, html, attachments = [] }) {
     const gmail = google.gmail({ version: "v1", auth: oauth2Client });
 
-    const boundary = "----=_Part_123456";
+    const boundary = "boundary123";
 
     let mime = [
         `From: "CinéPop" <${process.env.EMAIL}>`,
@@ -49,13 +49,12 @@ async function sendEmailAPI({ to, subject, html, text, attachments = [] }) {
         "",
         `--${boundary}`,
         "Content-Type: text/html; charset=UTF-8",
-        "Content-Transfer-Encoding: quoted-printable",
         "",
-        html
+        html,
     ];
 
     for (let att of attachments) {
-        const base64 = att.content.toString("base64").replace(/(.{76})/g, "$1\n");
+        const base64 = att.content.toString("base64");
 
         mime.push(
             `--${boundary}`,
@@ -63,12 +62,11 @@ async function sendEmailAPI({ to, subject, html, text, attachments = [] }) {
             `Content-Disposition: attachment; filename="${att.filename}"`,
             "Content-Transfer-Encoding: base64",
             "",
-            base64,
-            ""
+            base64
         );
     }
 
-    mime.push(`--${boundary}--`, "");
+    mime.push(`--${boundary}--`);
 
     const encodedMessage = Buffer.from(mime.join("\n"))
         .toString("base64")
