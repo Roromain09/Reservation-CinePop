@@ -314,6 +314,22 @@ app.get("/verify", (req, res) => {
         <html><body style="font-family:Arial;text-align:center;padding-top:80px;">
             <img src="/img/cross.png" style="width:120px;">
             <h1 style="color:#c00;">Ticket hors créneau</h1>
+			<script>
+    async function playError() {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const response = await fetch("/sounds/error.mp3");
+        const arrayBuffer = await response.arrayBuffer();
+        const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+        const source = ctx.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(ctx.destination);
+        source.start(0);
+    }
+
+    window.onload = () => {
+        setTimeout(playError, 100);
+    };
+</script>
         </body></html>
         `);
     }
@@ -373,6 +389,23 @@ app.get("/verify", (req, res) => {
         <p><b>Date :</b> ${escapeHtml(resa.sessionDate)}</p>
         <p><b>Heure :</b> ${escapeHtml(resa.sessionTime)}</p>
     </div>
+	<script>
+    async function playBeep() {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const response = await fetch("/sounds/valid.mp3");
+        const arrayBuffer = await response.arrayBuffer();
+        const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+        const source = ctx.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(ctx.destination);
+        source.start(0);
+    }
+
+    // Lance automatiquement le bip
+    window.onload = () => {
+        setTimeout(playBeep, 100);
+    };
+</script>
 </body>
 </html>
 `;
