@@ -260,134 +260,53 @@ app.post("/api/refuser", async (req, res) => {
     }
 });
 
+
 // 🔎 Vérification QR code
 app.get("/verify", (req, res) => {
     const id = req.query.id;
+    const check = req.query.check;
+
     const data = JSON.parse(fs.readFileSync(FILE));
     const resa = data.find(r => r.id == id);
 
-    if (!resa) {
-        return res.send(`
-        <html><body style="font-family:Arial;text-align:center;padding-top:80px;">
-            <img src="/img/cross.png" style="width:120px;">
-            <h1 style="color:#c00;">Ticket invalide</h1>
-        </body></html>
-        `);
+    // --- SI CHECK = 1 → ON RENVOIE JSON ---
+    if (check == "1") {
+        if (!resa) return res.json({ status: "invalid", reason: "not_found" });
+        if (resa.status !== "validé") return res.json({ status: "invalid", reason: "not_validated" });
+
+        const now = DateTime.now().setZone("Europe/Paris").toJSDate();
+        const sessionDateTime = DateTime.fromFormat(
+            `${resa.sessionDate} ${resa.sessionTime}`,
+            "yyyy-MM-dd HH:mm",
+            { zone: "Europe/Paris" }
+        ).toJSDate();
+
+        const startWindow = new Date(sessionDateTime);
+        startWindow.setMinutes(startWindow.getMinutes() - 30);
+        const endWindow = new Date(sessionDateTime);
+        endWindow.setMinutes(endWindow.getMinutes() + 5);
+
+        if (now < startWindow || now > endWindow) {
+            return res.json({ status: "invalid", reason: "time" });
+        }
+
+        return res.json({
+            status: "valid",
+            client: resa.clientName,
+            film: resa.filmTitle,
+            salle: resa.roomNumber,
+            date: resa.sessionDate,
+            heure: resa.sessionTime
+        });
     }
 
-    if (resa.status !== "validé") {
-        return res.send(`
-<html>
-<head>
-<meta charset="UTF-8">
-<style>
-    body { font-family:Arial;text-align:center;padding-top:80px; }
-    h1 { color:#c00; }
-</style>
-</head>
-<body>
-    <audio autoplay>
-        <source src="/sounds/error.mp3" type="audio/mpeg">
-    </audio>
-
-    <img src="/img/cross.png" style="width:120px;">
-    <h1>Ticket invalide</h1>
-</body>
-</html>
-`);
-    }
-
-    const now = DateTime.now().setZone("Europe/Paris").toJSDate();
-    const sessionDateTime = DateTime.fromFormat(
-        `${resa.sessionDate} ${resa.sessionTime}`,
-        "yyyy-MM-dd HH:mm",
-        { zone: "Europe/Paris" }
-    ).toJSDate();
-
-    const startWindow = new Date(sessionDateTime);
-    startWindow.setMinutes(startWindow.getMinutes() - 30);
-    const endWindow = new Date(sessionDateTime);
-    endWindow.setMinutes(endWindow.getMinutes() + 5);
-
-    if (now < startWindow || now > endWindow) {
-        return res.send(`
-        <!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<title>Ticket CinéPop</title>
-<style>
-    body {
-        background: #fff;
-        font-family: Arial, sans-serif;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        margin: 0;
-        text-align: center;
-    }
-    .card {
-        padding: 40px;
-        border-radius: 12px;
-        width: 350px;
-        border: 2px solid #e0e0e0;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-    }
-    h1 {
-        color: #e74c3c;
-        font-size: 32px;
-        margin-bottom: 10px;
-    }
-    p {
-        font-size: 18px;
-        color: #333;
-        margin: 6px 0;
-    }
-    .icon {
-        width: 120px;
-        margin-bottom: 20px;
-    }
-    .tap {
-        margin-top: 20px;
-        font-size: 16px;
-        color: #888;
-    }
-</style>
-</head>
-<body>
-
-    <div class="card">
-        <img src="/img/cross.png" class="icon">
-        <h1>{{TITRE}}</h1>
-        <p class="tap">Touchez l’écran pour jouer le bip d’erreur</p>
-    </div>
-
-<script>
-document.body.addEventListener("click", async () => {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const response = await fetch("/sounds/error.mp3");
-    const arrayBuffer = await response.arrayBuffer();
-    const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
-    const source = ctx.createBufferSource();
-    source.buffer = audioBuffer;
-    source.connect(ctx.destination);
-    source.start(0);
-});
-</script>
-
-</body>
-</html>
-        `);
-    }
-
-    // --- PAGE TICKET VALIDE ---
-    let page = `
+    // --- SINON → PAGE AVEC BOUTON CHECK ---
+    res.send(`
 <!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Ticket CinéPop</title>
+<title>Vérification Ticket</title>
 <style>
     body {
         background: #fff;
@@ -399,66 +318,99 @@ document.body.addEventListener("click", async () => {
         margin: 0;
         text-align: center;
     }
+    #checkBtn {
+        padding: 20px 40px;
+        font-size: 22px;
+        border-radius: 10px;
+        border: none;
+        background: #3498db;
+        color: white;
+        cursor: pointer;
+    }
+    #result {
+        margin-top: 30px;
+        display: none;
+    }
     .card {
         padding: 40px;
         border-radius: 12px;
         width: 350px;
         border: 2px solid #e0e0e0;
         box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-    }
-    h1 {
-        color: #2ecc71;
-        font-size: 32px;
-        margin-bottom: 10px;
-    }
-    p {
-        font-size: 18px;
-        color: #333;
-        margin: 6px 0;
+        margin: auto;
     }
     .icon {
         width: 120px;
         margin-bottom: 20px;
     }
-    .tap {
-        margin-top: 20px;
-        font-size: 16px;
-        color: #888;
-    }
+    h1 { font-size: 32px; margin-bottom: 10px; }
+    p { font-size: 18px; margin: 6px 0; }
 </style>
 </head>
 <body>
 
-    <div class="card" id="card">
-        <img src="/img/check.png" class="icon">
-        <h1>Ticket VALIDE</h1>
-        <p><b>Client :</b> {{CLIENT}}</p>
-        <p><b>Film :</b> {{FILM}}</p>
-        <p><b>Salle :</b> {{SALLE}}</p>
-        <p><b>Date :</b> {{DATE}}</p>
-        <p><b>Heure :</b> {{HEURE}}</p>
+    <div>
+        <button id="checkBtn">CHECK TICKET</button>
 
-        <p class="tap">Touchez l’écran pour jouer le bip</p>
+        <div id="result"></div>
     </div>
 
 <script>
-document.body.addEventListener("click", async () => {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const response = await fetch("/sounds/valid.mp3");
-    const arrayBuffer = await response.arrayBuffer();
-    const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
-    const source = ctx.createBufferSource();
-    source.buffer = audioBuffer;
-    source.connect(ctx.destination);
-    source.start(0);
+document.getElementById("checkBtn").addEventListener("click", async () => {
+    const res = await fetch("/verify?id=${id}&check=1");
+    const data = await res.json();
+
+    const box = document.getElementById("result");
+    box.style.display = "block";
+
+    if (data.status === "valid") {
+        box.innerHTML = \`
+            <div class="card">
+                <img src="/img/check.png" class="icon">
+                <h1 style="color:#2ecc71;">Ticket VALIDE</h1>
+                <p><b>Client :</b> \${data.client}</p>
+                <p><b>Film :</b> \${data.film}</p>
+                <p><b>Salle :</b> \${data.salle}</p>
+                <p><b>Date :</b> \${data.date}</p>
+                <p><b>Heure :</b> \${data.heure}</p>
+            </div>
+        \`;
+
+        // SON VALIDE
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const response = await fetch("/sounds/valid.mp3");
+        const arrayBuffer = await response.arrayBuffer();
+        const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+        const source = ctx.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(ctx.destination);
+        source.start(0);
+
+    } else {
+        box.innerHTML = \`
+            <div class="card">
+                <img src="/img/cross.png" class="icon">
+                <h1 style="color:#e74c3c;">Ticket REFUSÉ</h1>
+                <p>Raison : \${data.reason}</p>
+            </div>
+        \`;
+
+        // SON ERREUR
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const response = await fetch("/sounds/error.mp3");
+        const arrayBuffer = await response.arrayBuffer();
+        const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+        const source = ctx.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(ctx.destination);
+        source.start(0);
+    }
 });
 </script>
 
 </body>
 </html>
-`;
-
-    res.send(page);
+    `);
 });
 
 // Nettoyage automatique toutes les heures
