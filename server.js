@@ -315,20 +315,16 @@ app.get("/verify", (req, res) => {
             <img src="/img/cross.png" style="width:120px;">
             <h1 style="color:#c00;">Ticket hors créneau</h1>
 			<script>
-    async function playError() {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const response = await fetch("/sounds/error.mp3");
-        const arrayBuffer = await response.arrayBuffer();
-        const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
-        const source = ctx.createBufferSource();
-        source.buffer = audioBuffer;
-        source.connect(ctx.destination);
-        source.start(0);
-    }
-
-    window.onload = () => {
-        setTimeout(playError, 100);
-    };
+document.body.addEventListener("click", async () => {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const response = await fetch("/sounds/error.mp3");
+    const arrayBuffer = await response.arrayBuffer();
+    const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+    const source = ctx.createBufferSource();
+    source.buffer = audioBuffer;
+    source.connect(ctx.destination);
+    source.start(0);
+});
 </script>
         </body></html>
         `);
@@ -373,39 +369,40 @@ app.get("/verify", (req, res) => {
         width: 120px;
         margin-bottom: 20px;
     }
+    .tap {
+        margin-top: 20px;
+        font-size: 16px;
+        color: #888;
+    }
 </style>
 </head>
 <body>
-    <audio id="sound" autoplay>
-        <source src="/sounds/valid.mp3" type="audio/mpeg">
-    </audio>
 
-    <div class="card">
+    <div class="card" id="card">
         <img src="/img/check.png" class="icon">
         <h1>Ticket VALIDE</h1>
-        <p><b>Client :</b> ${escapeHtml(resa.clientName)}</p>
-        <p><b>Film :</b> ${escapeHtml(resa.filmTitle)}</p>
-        <p><b>Salle :</b> ${escapeHtml(resa.roomNumber)}</p>
-        <p><b>Date :</b> ${escapeHtml(resa.sessionDate)}</p>
-        <p><b>Heure :</b> ${escapeHtml(resa.sessionTime)}</p>
-    </div>
-	<script>
-    async function playBeep() {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const response = await fetch("/sounds/valid.mp3");
-        const arrayBuffer = await response.arrayBuffer();
-        const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
-        const source = ctx.createBufferSource();
-        source.buffer = audioBuffer;
-        source.connect(ctx.destination);
-        source.start(0);
-    }
+        <p><b>Client :</b> {{CLIENT}}</p>
+        <p><b>Film :</b> {{FILM}}</p>
+        <p><b>Salle :</b> {{SALLE}}</p>
+        <p><b>Date :</b> {{DATE}}</p>
+        <p><b>Heure :</b> {{HEURE}}</p>
 
-    // Lance automatiquement le bip
-    window.onload = () => {
-        setTimeout(playBeep, 100);
-    };
+        <p class="tap">Touchez l’écran pour jouer le bip</p>
+    </div>
+
+<script>
+document.body.addEventListener("click", async () => {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const response = await fetch("/sounds/valid.mp3");
+    const arrayBuffer = await response.arrayBuffer();
+    const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+    const source = ctx.createBufferSource();
+    source.buffer = audioBuffer;
+    source.connect(ctx.destination);
+    source.start(0);
+});
 </script>
+
 </body>
 </html>
 `;
