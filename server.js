@@ -279,7 +279,58 @@ app.get("/verify", (req, res) => {
 
     if (now < startWindow || now > endWindow) return res.send("<h1>⛔ Ticket hors créneau</h1>");
 
-    res.send(`<h1>✅ Ticket VALIDE</h1><p>Client : ${escapeHtml(resa.clientName)}</p><p>Film : ${escapeHtml(resa.filmTitle)}</p>`);
+    let page = `
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Ticket CinéPop</title>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background: #111;
+        color: #fff;
+        font-family: "Arial", sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        text-align: center;
+    }
+    .card {
+        background: #1a1a1a;
+        padding: 40px;
+        border-radius: 12px;
+        border: 2px solid #d4af37;
+        box-shadow: 0 0 25px rgba(212,175,55,0.4);
+        width: 350px;
+    }
+    h1 {
+        font-size: 32px;
+        margin-bottom: 10px;
+        color: #d4af37;
+    }
+    p {
+        font-size: 18px;
+        margin: 8px 0;
+    }
+</style>
+</head>
+<body>
+    <div class="card">
+        <h1>🎉 Ticket VALIDE</h1>
+        <p><b>Client :</b> {{CLIENT}}</p>
+        <p><b>Film :</b> {{FILM}}</p>
+    </div>
+</body>
+</html>
+`;
+
+page = page.replace("{{CLIENT}}", escapeHtml(resa.clientName));
+page = page.replace("{{FILM}}", escapeHtml(resa.filmTitle));
+
+res.send(page);
 });
 
 // Nettoyage automatique toutes les heures
