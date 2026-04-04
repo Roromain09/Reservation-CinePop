@@ -266,71 +266,101 @@ app.get("/verify", (req, res) => {
     const data = JSON.parse(fs.readFileSync(FILE));
     const resa = data.find(r => r.id == id);
 
-    if (!resa) return res.send("<h1>❌ Ticket invalide</h1>");
-    if (resa.status !== "validé") return res.send("<h1>⏳ Ticket non validé</h1>");
+    if (!resa) {
+        return res.send(`
+        <html><body style="font-family:Arial;text-align:center;padding-top:80px;">
+            <img src="/img/cross.png" style="width:120px;">
+            <h1 style="color:#c00;">Ticket invalide</h1>
+        </body></html>
+        `);
+    }
+
+    if (resa.status !== "validé") {
+        return res.send(`
+        <html><body style="font-family:Arial;text-align:center;padding-top:80px;">
+            <img src="/img/cross.png" style="width:120px;">
+            <h1 style="color:#c00;">Ticket non validé</h1>
+        </body></html>
+        `);
+    }
 
     const now = DateTime.now().setZone("Europe/Paris").toJSDate();
-    const sessionDateTime = DateTime.fromFormat(`${resa.sessionDate} ${resa.sessionTime}`, "yyyy-MM-dd HH:mm", { zone: "Europe/Paris" }).toJSDate();
+    const sessionDateTime = DateTime.fromFormat(
+        `${resa.sessionDate} ${resa.sessionTime}`,
+        "yyyy-MM-dd HH:mm",
+        { zone: "Europe/Paris" }
+    ).toJSDate();
 
     const startWindow = new Date(sessionDateTime);
     startWindow.setMinutes(startWindow.getMinutes() - 30);
     const endWindow = new Date(sessionDateTime);
     endWindow.setMinutes(endWindow.getMinutes() + 5);
 
-    if (now < startWindow || now > endWindow) return res.send("<h1>⛔ Ticket hors créneau</h1>");
+    if (now < startWindow || now > endWindow) {
+        return res.send(`
+        <html><body style="font-family:Arial;text-align:center;padding-top:80px;">
+            <img src="/img/cross.png" style="width:120px;">
+            <h1 style="color:#c00;">Ticket hors créneau</h1>
+        </body></html>
+        `);
+    }
 
+    // --- PAGE TICKET VALIDE ---
     let page = `
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<title>Ticket CinéPop</title>
-<style>
-    body {
-        margin: 0;
-        padding: 0;
-        background: #111;
-        color: #fff;
-        font-family: "Arial", sans-serif;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        text-align: center;
-    }
-    .card {
-        background: #1a1a1a;
-        padding: 40px;
-        border-radius: 12px;
-        border: 2px solid #d4af37;
-        box-shadow: 0 0 25px rgba(212,175,55,0.4);
-        width: 350px;
-    }
-    h1 {
-        font-size: 32px;
-        margin-bottom: 10px;
-        color: #d4af37;
-    }
-    p {
-        font-size: 18px;
-        margin: 8px 0;
-    }
-</style>
-</head>
-<body>
-    <div class="card">
-        <h1>🎉 Ticket VALIDE</h1>
-        <p><b>Client :</b> {{CLIENT}}</p>
-        <p><b>Film :</b> {{FILM}}</p>
-    </div>
-</body>
-</html>
-`;
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+    <meta charset="UTF-8">
+    <title>Ticket CinéPop</title>
+    <style>
+        body {
+            background: #fff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        .card {
+            padding: 40px;
+            border-radius: 12px;
+            width: 350px;
+            border: 2px solid #e0e0e0;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        }
+        h1 {
+            color: #2ecc71;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        p {
+            font-size: 18px;
+            color: #333;
+            margin: 6px 0;
+        }
+        .icon {
+            width: 120px;
+            margin-bottom: 20px;
+        }
+    </style>
+    </head>
+    <body>
+        <div class="card">
+            <img src="/img/check.png" class="icon">
+            <h1>Ticket VALIDE</h1>
+            <p><b>Client :</b> ${escapeHtml(resa.clientName)}</p>
+            <p><b>Film :</b> ${escapeHtml(resa.filmTitle)}</p>
+            <p><b>Salle :</b> ${escapeHtml(resa.roomNumber)}</p>
+            <p><b>Date :</b> ${escapeHtml(resa.sessionDate)}</p>
+            <p><b>Heure :</b> ${escapeHtml(resa.sessionTime)}</p>
+        </div>
+    </body>
+    </html>
+    `;
 
-page = page.replace("{{CLIENT}}", escapeHtml(resa.clientName));
-page = page.replace("{{FILM}}", escapeHtml(resa.filmTitle));
-
-res.send(page);
+    res.send(page);
 });
 
 // Nettoyage automatique toutes les heures
