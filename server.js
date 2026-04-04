@@ -50,7 +50,7 @@ async function sendEmailAPI({ to, subject, html, attachments = [] }) {
         `--${boundary}`,
         "Content-Type: text/html; charset=UTF-8",
         "",
-        html,
+        html
     ];
 
     for (let att of attachments) {
@@ -160,6 +160,7 @@ app.post("/api/valider", async (req, res) => {
             <p style="font-size:10px;">Ticket #${resa.id}</p>
         </div>`;
 
+        // --- LANCEMENT PUPPETEER FIABLE ---
         const browser = await puppeteer.launch({
             args: [...chromium.args, "--no-sandbox", "--disable-setuid-sandbox"],
             executablePath: await chromium.executablePath(),
@@ -167,10 +168,34 @@ app.post("/api/valider", async (req, res) => {
         });
 
         const page = await browser.newPage();
-        await page.setContent(html);
-        const buffer = await page.pdf({ format: "A6", printBackground: true });
+
+        // Correction Render : utiliser data:URL
+        await page.goto("data:text/html," + encodeURIComponent(html), {
+            waitUntil: "networkidle0"
+        });
+
+        // --- GÉNÉRATION PDF ---
+        const buffer = await page.pdf({
+            width: "300px",
+            height: "500px",
+            printBackground: true
+        });
+
         await browser.close();
 
+        // --- TEST 1 : Taille du PDF ---
+        console.log("Taille PDF généré :", buffer.length);
+
+        // --- TEST 2 : Sauvegarde locale ---
+        fs.writeFileSync("test.pdf", buffer);
+        console.log("PDF local enregistré : test.pdf");
+
+        // Si PDF trop petit → erreur
+        if (buffer.length < 5000) {
+            console.error("PDF trop petit → probablement corrompu");
+        }
+
+        // --- ENVOI EMAIL ---
         await sendEmailAPI({
             to: resa.email,
             subject: "🎟️ Votre billet CinéPop",
