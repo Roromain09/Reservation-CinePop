@@ -309,48 +309,68 @@ app.get("/verify", (req, res) => {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Vérification Ticket</title>
-
 <style>
-* { box-sizing: border-box; }
+    * {
+        box-sizing: border-box;
+    }
 
-body {
-    background: #fff;
-    font-family: Arial, sans-serif;
-    margin: 0;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 16px;
-    text-align: center;
-}
+    body {
+        background: #fff;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 16px;
+        text-align: center;
+    }
 
-#checkBtn {
-    width: min(90vw, 360px);
-    padding: 18px 24px;
-    font-size: 20px;
-    border-radius: 12px;
-    border: none;
-    background: #3498db;
-    color: white;
-    cursor: pointer;
-    touch-action: manipulation;
-}
+    #checkBtn {
+        width: min(90vw, 360px);
+        padding: 18px 24px;
+        font-size: 20px;
+        border-radius: 12px;
+        border: none;
+        background: #3498db;
+        color: white;
+        cursor: pointer;
+        touch-action: manipulation;
+    }
 
-#result { margin-top: 20px; display: none; }
+    #result {
+        margin-top: 20px;
+        display: none;
+    }
 
-.card {
-    width: min(92vw, 420px);
-    padding: 28px 20px;
-    border-radius: 16px;
-    border: 2px solid #e0e0e0;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-    margin: 0 auto;
-    background: white;
-    text-align: center;
-}
+    .card {
+        width: min(92vw, 420px);
+        padding: 28px 20px;
+        border-radius: 16px;
+        border: 2px solid #e0e0e0;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        margin: 0 auto;
+        background: white;
+    }
 
-.loader {
+    .icon {
+        width: 96px;
+        height: auto;
+        margin-bottom: 16px;
+    }
+
+    h1 {
+        font-size: 28px;
+        margin: 10px 0;
+    }
+
+    p {
+        font-size: 17px;
+        margin: 6px 0;
+        line-height: 1.4;
+        word-break: break-word;
+    }
+	.loader {
     width: 80px;
     height: 80px;
     margin: 0 auto 15px;
@@ -358,6 +378,7 @@ body {
     position: relative;
 }
 
+/* 🔥 ANNEAU ROTATIF */
 .loader::before {
     content: "";
     position: absolute;
@@ -369,6 +390,7 @@ body {
     animation: spin 1s linear infinite;
 }
 
+/* 🔥 GLOW INTERNE */
 .loader::after {
     content: "";
     position: absolute;
@@ -377,68 +399,73 @@ body {
     background: radial-gradient(circle, #00d4ff33, transparent);
     animation: pulse 1.5s ease-in-out infinite;
 }
-
-.text {
-    font-size: 15px;
-    color: #333;
-}
-
+/* ANIMATIONS */
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
 
 @keyframes pulse {
-    0%, 100% { transform: scale(1); opacity: 0.6; }
-    50% { transform: scale(1.2); opacity: 1; }
-}
-
-.icon { width: 96px; margin-bottom: 16px; }
-
-h1 { font-size: 28px; margin: 10px 0; }
-
-p {
-    font-size: 17px;
-    margin: 6px 0;
-    word-break: break-word;
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.6;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
 }
 </style>
 </head>
-
 <body>
 
-<div>
-    <button id="checkBtn">CHECK TICKET</button>
-    <div id="result"></div>
-</div>
+    <div>
+        <button id="checkBtn">CHECK TICKET</button>
+        <div id="result"></div>
+    </div>
 
 <script>
 document.getElementById("checkBtn").addEventListener("click", async () => {
-
-    navigator.vibrate?.(40);
-
+	navigator.vibrate?.(40);
     const box = document.getElementById("result");
     box.style.display = "block";
 
-    // 🔥 TON LOADER
-    box.innerHTML = '<div class="card"><div class="loader"></div><div class="text">Vérification...</div></div>';
+    // 🔥 Loader stylé
+    box.innerHTML = '<div class="loader"></div><div class="text">Vérification...</div>';
 
-    await new Promise(r => setTimeout(r, 2000));
+
+    // ⏳ Attente 1 seconde (effet fluide)
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     try {
-        const params = new URLSearchParams(window.location.search);
-        const id = params.get("id");
-
-        const res = await fetch(\`/verify?id=\${id}&check=1\`);
+        const res = await fetch("/verify?id=${id}&check=1");
         const data = await res.json();
 
         if (data.status === "valid") {
-            box.innerHTML = '<div class="card"><h1 style="color:#2ecc71;">✔ Ticket VALIDE</h1><p><b>Client :</b> ' + data.client + '</p><p><b>Film :</b> ' + data.film + '</p><p><b>Salle :</b> ' + data.salle + '</p><p><b>Date :</b> ' + data.date + '</p><p><b>Heure :</b> ' + data.heure + '</p></div>';
-        } else {
-            box.innerHTML = '<div class="card"><h1 style="color:#e74c3c;">✖ Ticket REFUSÉ</h1><p>Raison : ' + data.reason + '</p></div>';
-        }
+            box.innerHTML = '<div class="card"><img src="/img/check.png" class="icon"><h1 style="color:#2ecc71;">Ticket VALIDE</h1><p><b>Client :</b> ' + data.client + '</p><p><b>Film :</b> ' + data.film + '</p><p><b>Salle :</b> ' + data.salle + '</p><p><b>Date :</b> ' + data.date + '</p><p><b>Heure :</b> ' + data.heure + '</p></div>';
 
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const response = await fetch("/sounds/valid.mp3");
+            const arrayBuffer = await response.arrayBuffer();
+            const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+            const source = ctx.createBufferSource();
+            source.buffer = audioBuffer;
+            source.connect(ctx.destination);
+            source.start(0);
+
+        } else {
+            box.innerHTML = '<div class="card"><img src="/img/cross.png" class="icon"><h1 style="color:#e74c3c;">Ticket REFUSÉ</h1><p>Raison : ' + data.reason + '</p></div>';
+
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const response = await fetch("/sounds/error.mp3");
+            const arrayBuffer = await response.arrayBuffer();
+            const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+            const source = ctx.createBufferSource();
+            source.buffer = audioBuffer;
+            source.connect(ctx.destination);
+            source.start(0);
+        }
     } catch (err) {
-        box.innerHTML = '<div class="card"><h1 style="color:#e74c3c;">Erreur</h1></div>';
+        box.innerHTML = '<div class="card"><h1 style="color:#e74c3c;">Erreur</h1><p>Impossible de vérifier le ticket</p></div>';
     }
 });
 </script>
