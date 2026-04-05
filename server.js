@@ -409,15 +409,7 @@ document.getElementById("checkBtn").addEventListener("click", async () => {
         const data = await res.json();
 
         if (data.status === "valid") {
-            box.innerHTML = '<div class="card">
-			<img src="/img/check.png" class="icon">
-			<h1 style="color:#2ecc71;">Ticket VALIDE</h1>
-			<p><b>Client :</b> ' + data.client + '</p>
-			<p><b>Film :</b> ' + data.film + '</p>
-			<p><b>Salle :</b> ' + data.salle + '</p>
-			<p><b>Date :</b> ' + data.date + '</p>
-			<p><b>Heure :</b> ' + data.heure + '</p>
-			</div>';
+            box.innerHTML = '<div class="card"><img src="/img/check.png" class="icon"><h1 style="color:#2ecc71;">Ticket VALIDE</h1><p><b>Client :</b> ' + data.client + '</p><p><b>Film :</b> ' + data.film + '</p><p><b>Salle :</b> ' + data.salle + '</p><p><b>Date :</b> ' + data.date + '</p><p><b>Heure :</b> ' + data.heure + '</p></div>';
 
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
             const response = await fetch("/sounds/valid.mp3");
@@ -429,11 +421,7 @@ document.getElementById("checkBtn").addEventListener("click", async () => {
             source.start(0);
 
         } else {
-            box.innerHTML = '<div class="card">
-			<img src="/img/cross.png" class="icon">
-			<h1 style="color:#e74c3c;">Ticket REFUSÉ</h1>
-			<p>Raison : ' + data.reason + '</p>
-			</div>';
+            box.innerHTML = '<div class="card"><img src="/img/cross.png" class="icon"><h1 style="color:#e74c3c;">Ticket REFUSÉ</h1><p>Raison : ' + data.reason + '</p></div>';
 
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
             const response = await fetch("/sounds/error.mp3");
@@ -445,10 +433,7 @@ document.getElementById("checkBtn").addEventListener("click", async () => {
             source.start(0);
         }
     } catch (err) {
-        box.innerHTML = '<div class="card">
-		<h1 style="color:#e74c3c;">Erreur</h1>
-		<p>Impossible de vérifier le ticket</p>
-		</div>';
+        box.innerHTML = '<div class="card"><h1 style="color:#e74c3c;">Erreur</h1><p>Impossible de vérifier le ticket</p></div>';
     }
 });
 </script>
