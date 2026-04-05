@@ -306,52 +306,75 @@ app.get("/verify", (req, res) => {
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Vérification Ticket</title>
 <style>
+    * {
+        box-sizing: border-box;
+    }
+
     body {
         background: #fff;
         font-family: Arial, sans-serif;
+        margin: 0;
+        min-height: 100vh;
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100vh;
-        margin: 0;
+        padding: 16px;
         text-align: center;
     }
+
     #checkBtn {
-        padding: 20px 40px;
-        font-size: 22px;
-        border-radius: 10px;
+        width: min(90vw, 360px);
+        padding: 18px 24px;
+        font-size: 20px;
+        border-radius: 12px;
         border: none;
         background: #3498db;
         color: white;
         cursor: pointer;
+        touch-action: manipulation;
     }
+
     #result {
-        margin-top: 30px;
+        margin-top: 20px;
         display: none;
     }
+
     .card {
-        padding: 40px;
-        border-radius: 12px;
-        width: 350px;
+        width: min(92vw, 420px);
+        padding: 28px 20px;
+        border-radius: 16px;
         border: 2px solid #e0e0e0;
         box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-        margin: auto;
+        margin: 0 auto;
+        background: white;
     }
+
     .icon {
-        width: 120px;
-        margin-bottom: 20px;
+        width: 96px;
+        height: auto;
+        margin-bottom: 16px;
     }
-    h1 { font-size: 32px; margin-bottom: 10px; }
-    p { font-size: 18px; margin: 6px 0; }
+
+    h1 {
+        font-size: 28px;
+        margin: 10px 0;
+    }
+
+    p {
+        font-size: 17px;
+        margin: 6px 0;
+        line-height: 1.4;
+        word-break: break-word;
+    }
 </style>
 </head>
 <body>
 
     <div>
         <button id="checkBtn">CHECK TICKET</button>
-
         <div id="result"></div>
     </div>
 
@@ -366,7 +389,7 @@ document.getElementById("checkBtn").addEventListener("click", async () => {
     if (data.status === "valid") {
         box.innerHTML = \`
             <div class="card">
-                <img src="/img/check.png" class="icon">
+                <img src="/img/check.png" class="icon" alt="Valide">
                 <h1 style="color:#2ecc71;">Ticket VALIDE</h1>
                 <p><b>Client :</b> \${data.client}</p>
                 <p><b>Film :</b> \${data.film}</p>
@@ -376,7 +399,6 @@ document.getElementById("checkBtn").addEventListener("click", async () => {
             </div>
         \`;
 
-        // SON VALIDE
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
         const response = await fetch("/sounds/valid.mp3");
         const arrayBuffer = await response.arrayBuffer();
@@ -385,17 +407,15 @@ document.getElementById("checkBtn").addEventListener("click", async () => {
         source.buffer = audioBuffer;
         source.connect(ctx.destination);
         source.start(0);
-
     } else {
         box.innerHTML = \`
             <div class="card">
-                <img src="/img/cross.png" class="icon">
+                <img src="/img/cross.png" class="icon" alt="Refusé">
                 <h1 style="color:#e74c3c;">Ticket REFUSÉ</h1>
                 <p>Raison : \${data.reason}</p>
             </div>
         \`;
 
-        // SON ERREUR
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
         const response = await fetch("/sounds/error.mp3");
         const arrayBuffer = await response.arrayBuffer();
@@ -410,7 +430,7 @@ document.getElementById("checkBtn").addEventListener("click", async () => {
 
 </body>
 </html>
-    `);
+`);
 });
 
 // Nettoyage automatique toutes les heures
