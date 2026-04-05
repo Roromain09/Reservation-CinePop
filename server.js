@@ -271,8 +271,8 @@ app.get("/verify", (req, res) => {
 
     // --- SI CHECK = 1 → ON RENVOIE JSON ---
     if (check == "1") {
-        if (!resa) return res.json({ status: "invalid", reason: "not_found" });
-        if (resa.status !== "validé") return res.json({ status: "invalid", reason: "not_validated" });
+        if (!resa) return res.json({ status: "invalid", reason: "Identifiant inexistant" });
+        if (resa.status !== "validé") return res.json({ status: "invalid", reason: "réservation refusée" });
 
         const now = DateTime.now().setZone("Europe/Paris").toJSDate();
         const sessionDateTime = DateTime.fromFormat(
@@ -285,10 +285,6 @@ app.get("/verify", (req, res) => {
         startWindow.setMinutes(startWindow.getMinutes() - 30);
         const endWindow = new Date(sessionDateTime);
         endWindow.setMinutes(endWindow.getMinutes() + 5);
-		
-		if (!data) {
-			return res.json({ statut: "invalid", reason: "Ticket inexistant" });
-		}
 
         if (now < startWindow || now > endWindow) {
             return res.json({ status: "invalid", reason: "Hors délai" });
