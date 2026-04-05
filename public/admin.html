@@ -149,8 +149,6 @@ async function load() {
   const res = await fetch(`${API_URL}/api/admin`);
   const data = await res.json();
 
-  data.sort((a, b) => b.id - a.id);
-
   document.getElementById("list").innerHTML =
     data.map(r => `
       <div style="border:1px solid black; margin:10px; padding:10px;">
@@ -166,8 +164,8 @@ async function load() {
         ${
           r.status === "en attente"
           ? `
-            <button onclick="valider(${r.id})">✅ Valider</button>
-            <button onclick="refuser(${r.id})" style="background:red;color:white;margin-left:10px;">❌ Refuser</button>
+            <button onclick="valider('${r.id}')">✅ Valider</button>
+            <button onclick="refuser('${r.id}')" style="background:red;color:white;margin-left:10px;">❌ Refuser</button>
           `
           : r.status === "refusé"
           ? `<span style="color:red;">❌ Refusé</span>`
@@ -224,7 +222,7 @@ async function refuser(id) {
 }
 
 // refresh auto
-setInterval(load, 2000);
+setInterval(load, 5000);
 
 load();
 </script>
