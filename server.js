@@ -285,9 +285,13 @@ app.get("/verify", (req, res) => {
         startWindow.setMinutes(startWindow.getMinutes() - 30);
         const endWindow = new Date(sessionDateTime);
         endWindow.setMinutes(endWindow.getMinutes() + 5);
+		
+		if (!data) {
+			return res.json({ statut: "invalid", reason: "Ticket inexistant" });
+		}
 
         if (now < startWindow || now > endWindow) {
-            return res.json({ status: "invalid", reason: "time" });
+            return res.json({ status: "invalid", reason: "Hors délai" });
         }
 
         return res.json({
