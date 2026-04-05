@@ -370,6 +370,20 @@ app.get("/verify", (req, res) => {
         line-height: 1.4;
         word-break: break-word;
     }
+	.spinner {
+    border: 6px solid #eee;
+    border-top: 6px solid #3498db;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    margin: 0 auto;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
 </style>
 </head>
 <body>
@@ -381,50 +395,71 @@ app.get("/verify", (req, res) => {
 
 <script>
 document.getElementById("checkBtn").addEventListener("click", async () => {
-    const res = await fetch("/verify?id=${id}&check=1");
-    const data = await res.json();
-
     const box = document.getElementById("result");
     box.style.display = "block";
 
-    if (data.status === "valid") {
-        box.innerHTML = \`
-            <div class="card">
-                <img src="/img/check.png" class="icon" alt="Valide">
-                <h1 style="color:#2ecc71;">Ticket VALIDE</h1>
-                <p><b>Client :</b> \${data.client}</p>
-                <p><b>Film :</b> \${data.film}</p>
-                <p><b>Salle :</b> \${data.salle}</p>
-                <p><b>Date :</b> \${data.date}</p>
-                <p><b>Heure :</b> \${data.heure}</p>
-            </div>
-        \`;
+    // 🔥 Loader stylé
+    box.innerHTML = `
+        <div class="card">
+            <div class="spinner"></div>
+            <p style="margin-top:15px;">Vérification du ticket...</p>
+        </div>
+    `;
 
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const response = await fetch("/sounds/valid.mp3");
-        const arrayBuffer = await response.arrayBuffer();
-        const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
-        const source = ctx.createBufferSource();
-        source.buffer = audioBuffer;
-        source.connect(ctx.destination);
-        source.start(0);
-    } else {
-        box.innerHTML = \`
-            <div class="card">
-                <img src="/img/cross.png" class="icon" alt="Refusé">
-                <h1 style="color:#e74c3c;">Ticket REFUSÉ</h1>
-                <p>Raison : \${data.reason}</p>
-            </div>
-        \`;
+    // ⏳ Attente 1 seconde (effet fluide)
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const response = await fetch("/sounds/error.mp3");
-        const arrayBuffer = await response.arrayBuffer();
-        const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
-        const source = ctx.createBufferSource();
-        source.buffer = audioBuffer;
-        source.connect(ctx.destination);
-        source.start(0);
+    try {
+        const res = await fetch("/verify?id=${id}&check=1");
+        const data = await res.json();
+
+        if (data.status === "valid") {
+            box.innerHTML = `
+                <div class="card">
+                    <img src="/img/check.png" class="icon" alt="Valide">
+                    <h1 style="color:#2ecc71;">Ticket VALIDE</h1>
+                    <p><b>Client :</b> ${data.client}</p>
+                    <p><b>Film :</b> ${data.film}</p>
+                    <p><b>Salle :</b> ${data.salle}</p>
+                    <p><b>Date :</b> ${data.date}</p>
+                    <p><b>Heure :</b> ${data.heure}</p>
+                </div>
+            `;
+
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const response = await fetch("/sounds/valid.mp3");
+            const arrayBuffer = await response.arrayBuffer();
+            const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+            const source = ctx.createBufferSource();
+            source.buffer = audioBuffer;
+            source.connect(ctx.destination);
+            source.start(0);
+
+        } else {
+            box.innerHTML = `
+                <div class="card">
+                    <img src="/img/cross.png" class="icon" alt="Refusé">
+                    <h1 style="color:#e74c3c;">Ticket REFUSÉ</h1>
+                    <p>Raison : ${data.reason}</p>
+                </div>
+            `;
+
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const response = await fetch("/sounds/error.mp3");
+            const arrayBuffer = await response.arrayBuffer();
+            const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+            const source = ctx.createBufferSource();
+            source.buffer = audioBuffer;
+            source.connect(ctx.destination);
+            source.start(0);
+        }
+    } catch (err) {
+        box.innerHTML = `
+            <div class="card">
+                <h1 style="color:#e74c3c;">Erreur</h1>
+                <p>Impossible de vérifier le ticket</p>
+            </div>
+        `;
     }
 });
 </script>
