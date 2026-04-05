@@ -384,6 +384,61 @@ app.get("/verify", (req, res) => {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+.scan-container {
+    position: relative;
+    width: 100%;
+    height: 140px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #f5f7fa, #e4ecf3);
+    overflow: hidden;
+}
+
+/* grille légère style scan */
+.scan-container::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
+    background-size: 20px 20px;
+    opacity: 0.5;
+}
+
+/* ligne de scan */
+.scan-line {
+    position: absolute;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #3498db, transparent);
+    box-shadow: 0 0 12px #3498db;
+    animation: scanMove 1.3s linear infinite;
+}
+
+/* texte */
+.scan-text {
+    margin-top: 14px;
+    font-size: 16px;
+    color: #444;
+}
+
+/* animation */
+@keyframes scanMove {
+    0% {
+        top: 0;
+        opacity: 0;
+    }
+    15% {
+        opacity: 1;
+    }
+    50% {
+        top: 100%;
+        opacity: 1;
+    }
+    100% {
+        top: 100%;
+        opacity: 0;
+    }
+}
 </style>
 </head>
 <body>
@@ -395,11 +450,12 @@ app.get("/verify", (req, res) => {
 
 <script>
 document.getElementById("checkBtn").addEventListener("click", async () => {
+	navigator.vibrate?.(40);
     const box = document.getElementById("result");
     box.style.display = "block";
 
     // 🔥 Loader stylé
-    box.innerHTML = '<div class="card"><div class="spinner"></div><p style="margin-top:15px;">Vérification du ticket...</p></div>';
+    box.innerHTML = '<div class="card"><div class="scan-container"><div class="scan-line"></div></div><p class="scan-text">Vérification du ticket...</p></div>';
 
     // ⏳ Attente 1 seconde (effet fluide)
     await new Promise(resolve => setTimeout(resolve, 1000));
