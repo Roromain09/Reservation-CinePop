@@ -9,7 +9,7 @@ const QRCode = require("qrcode");
 const { google } = require('googleapis');
 const chromium = require("@sparticuz/chromium");
 const puppeteer = require("puppeteer-core");
-
+const { randomUUID } = require("crypto");
 require("dotenv").config();
 
 const app = express();
@@ -115,7 +115,7 @@ app.get("/", (req, res) => {
 app.post("/api/reserver", (req, res) => {
     const data = JSON.parse(fs.readFileSync(FILE));
     const newResa = {
-        id: Date.now(),
+        id: randomUUID(),
         status: "en attente",
         ...req.body
     };
@@ -135,7 +135,7 @@ app.post("/api/valider", async (req, res) => {
     try {
         const { id } = req.body;
         let data = JSON.parse(fs.readFileSync(FILE));
-        const resa = data.find(r => r.id == id);
+        const resa = data.find(r => r.id === id);
 
         if (!resa) return res.status(404).send("Réservation introuvable");
 
@@ -239,7 +239,7 @@ app.post("/api/refuser", async (req, res) => {
     try {
         const { id } = req.body;
         let data = JSON.parse(fs.readFileSync(FILE));
-        const resa = data.find(r => r.id == id);
+        const resa = data.find(r => r.id === id);
 
         if (!resa) return res.status(404).send("Réservation introuvable");
 
@@ -267,7 +267,7 @@ app.get("/verify", (req, res) => {
     const check = req.query.check;
 
     const data = JSON.parse(fs.readFileSync(FILE));
-    const resa = data.find(r => r.id == id);
+    const resa = data.find(r => r.id === id);
 
     // --- SI CHECK = 1 → ON RENVOIE JSON ---
     if (check == "1") {
