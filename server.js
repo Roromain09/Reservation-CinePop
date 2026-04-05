@@ -309,187 +309,136 @@ app.get("/verify", (req, res) => {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Vérification Ticket</title>
+
 <style>
-    * {
-        box-sizing: border-box;
-    }
+* { box-sizing: border-box; }
 
-    body {
-        background: #fff;
-        font-family: Arial, sans-serif;
-        margin: 0;
-        min-height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 16px;
-        text-align: center;
-    }
+body {
+    background: #fff;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    text-align: center;
+}
 
-    #checkBtn {
-        width: min(90vw, 360px);
-        padding: 18px 24px;
-        font-size: 20px;
-        border-radius: 12px;
-        border: none;
-        background: #3498db;
-        color: white;
-        cursor: pointer;
-        touch-action: manipulation;
-    }
+#checkBtn {
+    width: min(90vw, 360px);
+    padding: 18px 24px;
+    font-size: 20px;
+    border-radius: 12px;
+    border: none;
+    background: #3498db;
+    color: white;
+    cursor: pointer;
+    touch-action: manipulation;
+}
 
-    #result {
-        margin-top: 20px;
-        display: none;
-    }
+#result { margin-top: 20px; display: none; }
 
-    .card {
-        width: min(92vw, 420px);
-        padding: 28px 20px;
-        border-radius: 16px;
-        border: 2px solid #e0e0e0;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-        margin: 0 auto;
-        background: white;
-    }
-
-    .icon {
-        width: 96px;
-        height: auto;
-        margin-bottom: 16px;
-    }
-
-    h1 {
-        font-size: 28px;
-        margin: 10px 0;
-    }
-
-    p {
-        font-size: 17px;
-        margin: 6px 0;
-        line-height: 1.4;
-        word-break: break-word;
-    }
-	.spinner {
-    border: 6px solid #eee;
-    border-top: 6px solid #3498db;
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
+.card {
+    width: min(92vw, 420px);
+    padding: 28px 20px;
+    border-radius: 16px;
+    border: 2px solid #e0e0e0;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
     margin: 0 auto;
-    animation: spin 1s linear infinite;
+    background: white;
+    text-align: center;
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-.scan-container {
+.loader {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 15px;
+    border-radius: 50%;
     position: relative;
-    width: 100%;
-    height: 140px;
-    border-radius: 14px;
-    background: linear-gradient(135deg, #f5f7fa, #e4ecf3);
-    overflow: hidden;
 }
 
-/* grille légère style scan */
-.scan-container::before {
+.loader::before {
     content: "";
     position: absolute;
     inset: 0;
-    background-image: linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
-                      linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
-    background-size: 20px 20px;
-    opacity: 0.5;
+    border-radius: 50%;
+    border: 4px solid transparent;
+    border-top: 4px solid #00d4ff;
+    border-right: 4px solid #00d4ff;
+    animation: spin 1s linear infinite;
 }
 
-/* ligne de scan */
-.scan-line {
+.loader::after {
+    content: "";
     position: absolute;
-    width: 100%;
-    height: 3px;
-    background: linear-gradient(90deg, transparent, #3498db, transparent);
-    box-shadow: 0 0 12px #3498db;
-    animation: scanMove 1.3s linear infinite;
+    inset: 12px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #00d4ff33, transparent);
+    animation: pulse 1.5s ease-in-out infinite;
 }
 
-/* texte */
-.scan-text {
-    margin-top: 14px;
-    font-size: 16px;
-    color: #444;
+.text {
+    font-size: 15px;
+    color: #333;
 }
 
-/* animation */
-@keyframes scanMove {
-    0% {
-        top: 0;
-        opacity: 0;
-    }
-    15% {
-        opacity: 1;
-    }
-    50% {
-        top: 100%;
-        opacity: 1;
-    }
-    100% {
-        top: 100%;
-        opacity: 0;
-    }
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(1.2); opacity: 1; }
+}
+
+.icon { width: 96px; margin-bottom: 16px; }
+
+h1 { font-size: 28px; margin: 10px 0; }
+
+p {
+    font-size: 17px;
+    margin: 6px 0;
+    word-break: break-word;
 }
 </style>
 </head>
+
 <body>
 
-    <div>
-        <button id="checkBtn">CHECK TICKET</button>
-        <div id="result"></div>
-    </div>
+<div>
+    <button id="checkBtn">CHECK TICKET</button>
+    <div id="result"></div>
+</div>
 
 <script>
 document.getElementById("checkBtn").addEventListener("click", async () => {
-	navigator.vibrate?.(40);
+
+    navigator.vibrate?.(40);
+
     const box = document.getElementById("result");
     box.style.display = "block";
 
-    // 🔥 Loader stylé
-    box.innerHTML = '<div class="card"><div class="scan-container"><div class="scan-line"></div></div><p class="scan-text">Vérification du ticket...</p></div>';
+    // 🔥 TON LOADER
+    box.innerHTML = '<div class="card"><div class="loader"></div><div class="text">Vérification...</div></div>';
 
-    // ⏳ Attente 1 seconde (effet fluide)
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(r => setTimeout(r, 2000));
 
     try {
-        const res = await fetch("/verify?id=${id}&check=1");
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get("id");
+
+        const res = await fetch(\`/verify?id=\${id}&check=1\`);
         const data = await res.json();
 
         if (data.status === "valid") {
-            box.innerHTML = '<div class="card"><img src="/img/check.png" class="icon"><h1 style="color:#2ecc71;">Ticket VALIDE</h1><p><b>Client :</b> ' + data.client + '</p><p><b>Film :</b> ' + data.film + '</p><p><b>Salle :</b> ' + data.salle + '</p><p><b>Date :</b> ' + data.date + '</p><p><b>Heure :</b> ' + data.heure + '</p></div>';
-
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const response = await fetch("/sounds/valid.mp3");
-            const arrayBuffer = await response.arrayBuffer();
-            const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
-            const source = ctx.createBufferSource();
-            source.buffer = audioBuffer;
-            source.connect(ctx.destination);
-            source.start(0);
-
+            box.innerHTML = '<div class="card"><h1 style="color:#2ecc71;">✔ Ticket VALIDE</h1><p><b>Client :</b> ' + data.client + '</p><p><b>Film :</b> ' + data.film + '</p><p><b>Salle :</b> ' + data.salle + '</p><p><b>Date :</b> ' + data.date + '</p><p><b>Heure :</b> ' + data.heure + '</p></div>';
         } else {
-            box.innerHTML = '<div class="card"><img src="/img/cross.png" class="icon"><h1 style="color:#e74c3c;">Ticket REFUSÉ</h1><p>Raison : ' + data.reason + '</p></div>';
-
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const response = await fetch("/sounds/error.mp3");
-            const arrayBuffer = await response.arrayBuffer();
-            const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
-            const source = ctx.createBufferSource();
-            source.buffer = audioBuffer;
-            source.connect(ctx.destination);
-            source.start(0);
+            box.innerHTML = '<div class="card"><h1 style="color:#e74c3c;">✖ Ticket REFUSÉ</h1><p>Raison : ' + data.reason + '</p></div>';
         }
+
     } catch (err) {
-        box.innerHTML = '<div class="card"><h1 style="color:#e74c3c;">Erreur</h1><p>Impossible de vérifier le ticket</p></div>';
+        box.innerHTML = '<div class="card"><h1 style="color:#e74c3c;">Erreur</h1></div>';
     }
 });
 </script>
