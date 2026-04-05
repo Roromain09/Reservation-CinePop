@@ -272,7 +272,8 @@ app.get("/verify", (req, res) => {
     // --- SI CHECK = 1 → ON RENVOIE JSON ---
     if (check == "1") {
         if (!resa) return res.json({ status: "invalid", reason: "Identifiant inexistant" });
-        if (resa.status !== "validé") return res.json({ status: "invalid", reason: "réservation refusée" });
+        if (resa.status == "refusé") return res.json({ status: "invalid", reason: "réservation refusée" });
+		if (resa.status == "en attente") return res.json({ status: "invalid", reason: "réservation en attente" });
 
         const now = DateTime.now().setZone("Europe/Paris").toJSDate();
         const sessionDateTime = DateTime.fromFormat(
