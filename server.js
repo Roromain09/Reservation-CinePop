@@ -73,7 +73,6 @@ app.post("/api/reserver", (req, res) => {
     const newResa = {
         id: randomUUID(),
         status: "en attente",
-        createdAt: new Date(),
         ...req.body
     };
     data.push(newResa);
@@ -87,7 +86,7 @@ app.get("/api/admin", (req, res) => {
     res.json(data);
 });
 
-// 📩 Valider + Générer PDF pour téléchargement
+// 📩 Valider + Télécharger ticket PDF
 app.post("/api/valider", async (req, res) => {
     try {
         const { id } = req.body;
@@ -96,9 +95,10 @@ app.post("/api/valider", async (req, res) => {
 
         if (!resa) return res.status(404).send("Réservation introuvable");
 
-        const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
+        const BASE_URL = process.env.BASE_URL || "https://reservation-cinepop.onrender.com";
         const qrData = `${BASE_URL}/verify?id=${resa.id}`;
 
+        // QR Code buffer
         const qrBuffer = await QRCode.toBuffer(qrData);
         const qrBase64 = qrBuffer.toString("base64");
 
@@ -108,45 +108,44 @@ app.post("/api/valider", async (req, res) => {
 <head>
 <meta charset="UTF-8">
 <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    body { font-family: Arial; margin: 0; padding: 0; }
     .ticket {
-        width: 260px;
-        border: 2px dashed #333;
+        width: 280px;
+        border: 2px dashed black;
         padding: 20px;
         text-align: center;
-        margin: 10px auto;
-        background: #fff;
+        margin: 0 auto;
     }
-    h2 { margin: 0; color: #e74c3c; }
-    hr { border: 0; border-top: 1px solid #eee; margin: 15px 0; }
-    .film { font-size: 20px; font-weight: bold; margin: 10px 0; }
-    .details { font-size: 14px; text-align: left; }
-    .qr { margin-top: 15px; }
 </style>
 </head>
 <body>
     <div class="ticket">
-        <h2>CINEPOP</h2>
-        <p style="font-size: 10px;">BILLET DE CINÉMA</p>
+        <h2>TICKET CINEPOP</h2>
         <hr>
-        <div class="film">${escapeHtml(resa.filmTitle)}</div>
-        <div class="details">
-            <p><b>Salle :</b> ${escapeHtml(resa.roomNumber)}</p>
-            <p><b>Date :</b> ${escapeHtml(resa.sessionDate)}</p>
-            <p><b>Heure :</b> ${escapeHtml(resa.sessionTime)}</p>
-            <p><b>Places :</b> ${escapeHtml(resa.peopleNumber)}</p>
-            <p><b>Client :</b> ${escapeHtml(resa.clientName)}</p>
-        </div>
-        <div class="qr">
-            <img src="data:image/png;base64,${qrBase64}" style="width:130px;" />
-        </div>
-        <p style="font-size:9px; color: #888; margin-top:10px;">ID: ${resa.id}</p>
+        <h1>${escapeHtml(resa.filmTitle)}</h1>
+        <p><b>Salle :</b> ${escapeHtml(resa.roomNumber)}</p>
+        <p><b>Date :</b> ${escapeHtml(resa.sessionDate)}</p>
+        <p><b>Heure :</b> ${escapeHtml(resa.sessionTime)}</p>
+        <p><b>Client :</b> ${escapeHtml(resa.clientName)}</p>
+        <p><b>Places :</b> ${escapeHtml(resa.peopleNumber)}</p>
+        <img src="data:image/png;base64,${qrBase64}" style="width:120px;" />
+        <p style="font-size:10px;">Ticket #${resa.id}</p>
     </div>
 </body>
-</html>`;
+</html>
+`;
 
+        // --- LANCEMENT PUPPETEER ---
         const browser = await puppeteer.launch({
-            args: [...chromium.args, "--no-sandbox", "--disable-setuid-sandbox"],
+            args: [
+                ...chromium.args,
+                "--no-sandbox",
+                "--disable-setuid-sandbox",
+                "--disable-dev-shm-usage",
+                "--disable-gpu",
+                "--single-process",
+                "--no-zygote"
+            ],
             executablePath: await chromium.executablePath(),
             headless: chromium.headless,
         });
@@ -155,45 +154,52 @@ app.post("/api/valider", async (req, res) => {
         await page.setContent(html, { waitUntil: "networkidle0" });
 
         const buffer = await page.pdf({
-            width: "320px",
-            height: "550px",
-            printBackground: true,
-            margin: { top: 0, right: 0, bottom: 0, left: 0 }
+            width: "300px",
+            height: "500px",
+            printBackground: true
         });
 
         await browser.close();
 
-        // Mettre à jour le statut dans le JSON
+        // Mise à jour de l'état
         resa.status = "validé";
         resa.validatedAt = new Date();
         fs.writeFileSync(FILE, JSON.stringify(data, null, 2));
 
-        // Envoyer le fichier PDF
+        // --- ENVOI DU FICHIER AU NAVIGATEUR ---
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename=ticket-${resa.id}.pdf`);
+        res.setHeader('Content-Length', buffer.length);
+        
         res.send(buffer);
 
     } catch (err) {
-        console.error("Erreur génération PDF:", err);
-        res.status(500).send("Erreur lors de la validation");
+        console.error(err);
+        res.status(500).send("Erreur lors de la génération du ticket");
     }
 });
 
-// ❌ Refuser réservation (pas de mail envoyé, juste changement de statut)
-app.post("/api/refuser", (req, res) => {
-    const { id } = req.body;
-    let data = JSON.parse(fs.readFileSync(FILE));
-    const resa = data.find(r => r.id === id);
+// ❌ Refuser réservation
+app.post("/api/refuser", async (req, res) => {
+    try {
+        const { id } = req.body;
+        let data = JSON.parse(fs.readFileSync(FILE));
+        const resa = data.find(r => r.id === id);
 
-    if (!resa) return res.status(404).send("Réservation introuvable");
+        if (!resa) return res.status(404).send("Réservation introuvable");
 
-    resa.status = "refusé";
-    resa.refusedAt = new Date();
-    fs.writeFileSync(FILE, JSON.stringify(data, null, 2));
-    res.send("Réservation refusée");
+        resa.status = "refusé";
+        resa.refusedAt = new Date();
+        fs.writeFileSync(FILE, JSON.stringify(data, null, 2));
+
+        res.send("Réservation refusée");
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Erreur lors du refus");
+    }
 });
 
-// 🔎 Vérification QR code (Reste inchangé)
+// 🔎 Vérification QR code
 app.get("/verify", (req, res) => {
     const id = req.query.id;
     const check = req.query.check;
@@ -232,13 +238,98 @@ app.get("/verify", (req, res) => {
         });
     }
 
-    // Le HTML de la page de vérification (celui avec le bouton bleu) reste identique à votre version initiale...
-    res.send(`...votre code HTML de vérification ici...`); 
+    res.send(`
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Vérification Ticket</title>
+<style>
+    * { box-sizing: border-box; }
+    body {
+        background: #fff;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 16px;
+        text-align: center;
+    }
+    #checkBtn {
+        width: min(90vw, 360px);
+        padding: 18px 24px;
+        font-size: 20px;
+        border-radius: 12px;
+        border: none;
+        background: #3498db;
+        color: white;
+        cursor: pointer;
+        touch-action: manipulation;
+    }
+    #result { margin-top: 20px; display: none; }
+    .card {
+        width: min(92vw, 420px);
+        padding: 28px 20px;
+        border-radius: 16px;
+        border: 2px solid #e0e0e0;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        background: white;
+    }
+    .icon { width: 96px; height: auto; margin-bottom: 16px; }
+    .loader {
+        width: 80px; height: 80px;
+        margin: 0 auto 15px;
+        border-radius: 50%;
+        position: relative;
+    }
+    .loader::before {
+        content: ""; position: absolute; inset: 0;
+        border-radius: 50%; border: 4px solid transparent;
+        border-top: 4px solid #00d4ff; border-right: 4px solid #00d4ff;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+    <div>
+        <button id="checkBtn">CHECK TICKET</button>
+        <div id="result"></div>
+    </div>
+<script>
+document.getElementById("checkBtn").addEventListener("click", async () => {
+    navigator.vibrate?.(40);
+    const box = document.getElementById("result");
+    box.style.display = "block";
+    box.innerHTML = '<div class="loader"></div><div>Vérification...</div>';
+
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    try {
+        const res = await fetch("/verify?id=${id}&check=1");
+        const data = await res.json();
+
+        if (data.status === "valid") {
+            box.innerHTML = '<div class="card"><h1 style="color:#2ecc71;">Ticket VALIDE</h1><p><b>Client :</b> ' + data.client + '</p><p><b>Film :</b> ' + data.film + '</p></div>';
+        } else {
+            box.innerHTML = '<div class="card"><h1 style="color:#e74c3c;">Ticket REFUSÉ</h1><p>Raison : ' + data.reason + '</p></div>';
+        }
+    } catch (err) {
+        box.innerHTML = '<div class="card"><h1>Erreur</h1></div>';
+    }
+});
+</script>
+</body>
+</html>
+`);
 });
 
 setInterval(cleanOldReservations, 60 * 60 * 1000);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log("Serveur lancé sur http://localhost:" + PORT);
+    console.log("Serveur lancé sur le port " + PORT);
 });
