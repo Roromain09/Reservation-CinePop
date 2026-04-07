@@ -2,14 +2,13 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin - Cinéma CinéPop</title>
+  <title>Admin - Cinéma</title>
 <style>
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: Arial, sans-serif;
 }
 
 body {
@@ -22,92 +21,78 @@ h1 {
   text-align: center;
   color: #f5b700;
   margin-bottom: 30px;
-  text-transform: uppercase;
-  letter-spacing: 2px;
 }
 
 #list {
   display: flex;
   flex-direction: column;
   gap: 15px;
-  max-width: 800px;
-  margin: 0 auto;
 }
 
-.reservation-card {
+#list > div {
   background: #112240;
   border-radius: 12px;
-  padding: 20px;
+  padding: 15px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  border-left: 5px solid #233554;
   transition: transform 0.2s ease;
 }
 
-.reservation-card:hover {
+#list > div:hover {
   transform: translateY(-3px);
-  border-left-color: #f5b700;
 }
 
-p { margin: 8px 0; font-size: 14px; line-height: 1.4; }
+p { margin: 5px 0; }
 b { color: #f5b700; }
 
-.actions {
-  margin-top: 15px;
-  display: flex;
-  gap: 10px;
-}
-
 button {
-  flex: 1;
-  padding: 12px;
+  margin-top: 10px;
+  padding: 8px 12px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
-  transition: 0.3s;
-  font-size: 14px;
+  transition: 0.2s;
 }
 
-.btn-valider {
+button:first-of-type {
   background: #f5b700;
   color: #0a192f;
 }
 
-.btn-valider:hover {
+button:first-of-type:hover {
   background: #ffd84d;
 }
 
-.btn-refuser {
-  background: #ff4d4d;
-  color: white;
+button[style*="background:red"] {
+  background: #ff4d4d !important;
 }
 
-.btn-refuser:hover {
-  background: #ff1a1a;
+button[style*="background:red"]:hover {
+  background: #ff1a1a !important;
 }
 
-.status-badge {
+span {
   display: inline-block;
   margin-top: 10px;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 12px;
   font-weight: bold;
 }
 
-.status-valid { background: rgba(77, 255, 136, 0.2); color: #4dff88; }
-.status-refused { background: rgba(255, 77, 77, 0.2); color: #ff4d4d; }
+span[style*="green"] { color: #4dff88 !important; }
+span[style*="red"] { color: #ff4d4d !important; }
 
 @media (max-width: 600px) {
   body { padding: 10px; }
-  .actions { flex-direction: column; }
+  #list > div { padding: 12px; }
+  button { width: 100%; margin-top: 8px; }
 }
 
 /* 🔥 LOADER */
 #loader {
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background: rgba(10, 25, 47, 0.9);
   display: none;
   align-items: center;
@@ -117,12 +102,17 @@ button {
 }
 
 .spinner {
-  border: 6px solid #233554;
+  border: 6px solid #ccc;
   border-top: 6px solid #f5b700;
   border-radius: 50%;
-  width: 60px;
-  height: 60px;
+  width: 50px;
+  height: 50px;
   animation: spin 1s linear infinite;
+}
+
+#loader p {
+  margin-top: 15px;
+  color: #f5b700;
 }
 
 @keyframes spin {
@@ -134,106 +124,67 @@ button {
 
 <body>
 
-<h1>🎬 Admin CinéPop</h1>
+<h1>🎬 Réservations</h1>
 
 <div id="list"></div>
 
+<!-- 🔥 LOADER -->
 <div id="loader">
   <div class="spinner"></div>
-  <p style="margin-top:15px; color:#f5b700;">Génération du ticket PDF...</p>
+  <p>Traitement en cours...</p>
 </div>
 
 <script>
-// Remplacez par votre URL Render si nécessaire
-const API_URL = window.location.origin; 
+const API_URL = "https://reservation-cinepop.onrender.com";
 
-function showLoader() { document.getElementById("loader").style.display = "flex"; }
-function hideLoader() { document.getElementById("loader").style.display = "none"; }
-
-async function load() {
-  try {
-    const res = await fetch(`${API_URL}/api/admin`);
-    const data = await res.json();
-
-    // Tri pour mettre les "en attente" en premier
-    data.sort((a, b) => (a.status === 'en attente' ? -1 : 1));
-
-    document.getElementById("list").innerHTML = data.map(r => `
-      <div class="reservation-card">
-        <p><b>Client :</b> ${r.clientName}</p>
-        <p><b>Film :</b> ${r.filmTitle}</p>
-        <p><b>Places :</b> ${r.peopleNumber}</p>
-        <p><b>Séance :</b> ${r.sessionDate} à ${r.sessionTime}</p>
-        <p style="font-size:11px; opacity:0.6;">ID: ${r.id}</p>
-
-        <div class="actions">
-          ${r.status === "en attente" ? `
-            <button class="btn-valider" onclick="valider('${r.id}')">✅ Valider & Télécharger</button>
-            <button class="btn-refuser" onclick="refuser('${r.id}')">❌ Refuser</button>
-          ` : r.status === "refusé" ? `
-            <span class="status-badge status-refused">ANNULÉ / REFUSÉ</span>
-          ` : `
-            <span class="status-badge status-valid">TICKET ÉMIS</span>
-          `}
-        </div>
-      </div>
-    `).join("");
-  } catch (err) {
-    console.error("Erreur de chargement:", err);
-  }
+function showLoader() {
+  document.getElementById("loader").style.display = "flex";
 }
 
-// ✅ VALIDER + TÉLÉCHARGER LE PDF
+function hideLoader() {
+  document.getElementById("loader").style.display = "none";
+}
+
+async function load() {
+  const res = await fetch(`${API_URL}/api/admin`);
+  const data = await res.json();
+
+  document.getElementById("list").innerHTML =
+    data.map(r => `
+      <div style="border:1px solid black; margin:10px; padding:10px;">
+        <p><b>Client :</b> ${r.clientName}</p>
+        <p><b>Nombre :</b> ${r.peopleNumber}</p>
+        <p><b>Email :</b> ${r.email}</p>
+        <p><b>Film :</b> ${r.filmTitle}</p>
+        <p><b>Date :</b> ${r.sessionDate}</p>
+        <p><b>Heure :</b> ${r.sessionTime}</p>
+        <p><b>Statut :</b> ${r.status}</p>
+		<p><b>ID:</b> ${r.id}</p>
+
+        ${
+          r.status === "en attente"
+          ? `
+            <button onclick="valider('${r.id}')">✅ Valider</button>
+            <button onclick="refuser('${r.id}')" style="background:red;color:white;margin-left:10px;">❌ Refuser</button>
+          `
+          : r.status === "refusé"
+          ? `<span style="color:red;">❌ Refusé</span>`
+          : `<span style="color:green;">✔ Validé</span>`
+        }
+      </div>
+    `).join("");
+}
+
+// ✅ VALIDER
 async function valider(id) {
   showLoader();
 
   try {
     const res = await fetch(`${API_URL}/api/valider`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id })
-    });
-
-    if (res.ok) {
-      // 1. Récupérer le PDF en tant que Blob
-      const blob = await res.blob();
-      
-      // 2. Créer un lien de téléchargement
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `ticket-${id}.pdf`; // Nom du fichier
-      document.body.appendChild(a);
-      
-      // 3. Déclencher le téléchargement
-      a.click();
-      
-      // 4. Nettoyage
-      window.URL.revokeObjectURL(url);
-      a.remove();
-      
-      console.log("Ticket téléchargé");
-    } else {
-      alert("Erreur lors de la génération du ticket.");
-    }
-  } catch (err) {
-    console.error(err);
-    alert("Erreur serveur !");
-  }
-
-  hideLoader();
-  load();
-}
-
-// ❌ REFUSER
-async function refuser(id) {
-  if(!confirm("Refuser cette réservation ?")) return;
-  showLoader();
-
-  try {
-    const res = await fetch(`${API_URL}/api/refuser`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({ id })
     });
 
@@ -247,10 +198,32 @@ async function refuser(id) {
   load();
 }
 
-// Refresh auto toutes les 10 secondes
-setInterval(load, 10000);
+// ❌ REFUSER
+async function refuser(id) {
+  showLoader();
 
-// Premier chargement
+  try {
+    const res = await fetch(`${API_URL}/api/refuser`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ id })
+    });
+
+    const text = await res.text();
+    alert(text);
+  } catch (err) {
+    alert("Erreur serveur !");
+  }
+
+  hideLoader();
+  load();
+}
+
+// refresh auto
+setInterval(load, 5000);
+
 load();
 </script>
 
