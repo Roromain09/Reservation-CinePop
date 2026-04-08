@@ -175,7 +175,7 @@ async function load() {
     `).join("");
 }
 
-// ✅ VALIDER
+// ✅ VALIDER (version PDF)
 async function valider(id) {
   showLoader();
 
@@ -188,8 +188,24 @@ async function valider(id) {
       body: JSON.stringify({ id })
     });
 
-    const text = await res.text();
-    alert(text);
+    if (!res.ok) {
+      alert("Erreur lors de la génération du PDF");
+      hideLoader();
+      return;
+    }
+
+    // 🔥 Récupération du PDF en binaire
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    // 🔥 Déclenchement du téléchargement
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `ticket-${id}.pdf`;
+    a.click();
+
+    window.URL.revokeObjectURL(url);
+
   } catch (err) {
     alert("Erreur serveur !");
   }
