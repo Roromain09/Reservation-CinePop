@@ -168,7 +168,7 @@ app.post("/api/valider", async (req, res) => {
 
         // 🔥 Téléchargement direct du PDF
         res.setHeader("Content-Type", "application/pdf");
-        res.setHeader("Content-Disposition", `attachment; filename="ticket-${resa.id}.pdf"`);
+        res.setHeader("Content-Disposition", `attachment; filename="ticket-Cinepop-${resa.clientName}.pdf"`);
         res.send(buffer);
 
     } catch (err) {
