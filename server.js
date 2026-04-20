@@ -31,6 +31,19 @@ function escapeHtml(str) {
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
 }
+app.post("/api/checkpass", (req, res) => {
+  const { password } = req.body;
+
+  if (!process.env.ADMIN_PASSWORD) {
+    return res.status(500).json({ ok: false, error: "ADMIN_PASSWORD non défini" });
+  }
+
+  if (password === process.env.ADMIN_PASSWORD) {
+    return res.json({ ok: true });
+  }
+
+  res.json({ ok: false });
+});
 
 // --- LOGIQUE DE NETTOYAGE ---
 function cleanOldReservations() {
