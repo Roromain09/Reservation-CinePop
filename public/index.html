@@ -260,7 +260,21 @@
       box-shadow: 0 12px 28px rgba(245, 183, 0, 0.24);
       transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
     }
-
+	.checker {
+	width: 100%;
+      padding: 15px 18px;
+      margin-top: 6px;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--jaune), var(--jaune-soft));
+      color: #111;
+      font-size: 1rem;
+      font-weight: 900;
+      letter-spacing: 0.4px;
+      cursor: pointer;
+      box-shadow: 0 12px 28px rgba(245, 183, 0, 0.24);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    }
     button:hover {
       transform: translateY(-2px);
       box-shadow: 0 16px 34px rgba(245, 183, 0, 0.30);
@@ -511,7 +525,7 @@
         <div class="chip">Gratuit</div>
       </div>
 	  <div class="check">
-		<a href="https://reservation-cinepop.onrender.com/check.html"><button id="submitBtn" type="submit">Mes réservation</button></a>
+		<a href="https://reservation-cinepop.onrender.com/check.html"><button class="Checker" id="submitBtn" type="submit">Mes réservation</button></a>
 		</div>
       <div class="poster">
         <img src="acp.png">
@@ -536,7 +550,7 @@
         </div>
 
         <div class="field">
-          <input type="text" id="roomNumber" placeholder="Nom de la salle" required>
+          <input type="text" id="roomNumber" placeholder="Nom de la salle (facultatif)">
         </div>
 		
 		<div class="field">
@@ -562,7 +576,7 @@
           <div>
             <div class="success-title">Réservation confirmée</div>
             <div class="success-subtitle">Ton billet a bien été enregistré. 
-			Nos équipes traiterons ta demande au plus vite</div>
+			Nos équipes traiterons ta demande au plus vite ! Tu recevras tes billets par mail.</div>
           </div>
         </div>
 
@@ -652,7 +666,7 @@
       successCard.classList.add("show");
       form.classList.add("hidden");
       document.querySelector(".form-subtitle").textContent =
-        "Ta réservation est maintenant affichée ci-dessous.";
+        "Résumé de ta commande :";
     }
 
     form.addEventListener("submit", async (e) => {
