@@ -98,6 +98,28 @@ app.get("/api/admin", (req, res) => {
     const data = JSON.parse(fs.readFileSync(FILE));
     res.json(data);
 });
+// Check résa client 
+app.get("/api/reservation", (req, res) => {
+  const name = (req.query.name || "").trim().toLowerCase();
+
+  if (!name) {
+    return res.json({ ok: false, error: "Nom manquant" });
+  }
+
+  // Ton fichier JSON
+  const reservations = JSON.parse(fs.readFileSync("./reservations.json", "utf8"));
+
+  const result = reservations.filter(r =>
+    r.clientName.toLowerCase().includes(name)
+  );
+
+  if (result.length === 0) {
+    return res.json({ ok: false, error: "Aucune réservation trouvée" });
+  }
+
+  res.json({ ok: true, reservations: result });
+});
+
 
 // 📩 Valider + Télécharger PDF (remplace l'envoi email)
 app.post("/api/valider", async (req, res) => {
