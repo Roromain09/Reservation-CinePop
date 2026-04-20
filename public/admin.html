@@ -123,6 +123,37 @@ span[style*="red"] { color: #ff4d4d !important; }
 </head>
 
 <body>
+<div id="login-screen" style="
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: #0a192f;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+">
+  <h2 style="color:#f5b700; margin-bottom:20px;">🔐 Accès Administrateur</h2>
+
+  <input id="admin-pass" type="password" placeholder="Mot de passe"
+    style="padding:10px; border-radius:8px; border:none; width:200px; text-align:center;">
+
+  <button onclick="checkPassword()" style="
+    margin-top:15px;
+    padding:10px 20px;
+    background:#f5b700;
+    color:#0a192f;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
+  ">Entrer</button>
+
+  <p id="error-msg" style="color:red; margin-top:10px; display:none;">
+    Mot de passe incorrect
+  </p>
+</div>
 
 <h1>🎬 Réservations</h1>
 
@@ -135,7 +166,25 @@ span[style*="red"] { color: #ff4d4d !important; }
 </div>
 
 <script>
+
 const API_URL = "https://reservation-cinepop.onrender.com";
+async function checkPassword() {
+  const pass = document.getElementById("admin-pass").value;
+
+  const res = await fetch(`${API_URL}/api/checkpass`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password: pass })
+  });
+
+  const data = await res.json();
+
+  if (data.ok) {
+    document.getElementById("login-screen").style.display = "none";
+  } else {
+    document.getElementById("error-msg").style.display = "block";
+  }
+}
 
 function showLoader() {
   document.getElementById("loader").style.display = "flex";
