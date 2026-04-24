@@ -414,8 +414,6 @@ document.getElementById("checkBtn").addEventListener("click", async () => {
 `);
 });
 
-// Nettoyage automatique toutes les heures
-setInterval(cleanOldReservations, 60 * 60 * 1000);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
