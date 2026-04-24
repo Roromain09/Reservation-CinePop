@@ -45,34 +45,6 @@ app.post("/api/checkpass", (req, res) => {
   res.json({ ok: false });
 });
 
-// --- LOGIQUE DE NETTOYAGE ---
-function cleanOldReservations() {
-    try {
-        let data = JSON.parse(fs.readFileSync(FILE));
-        const now = new Date();
-
-        const filtered = data.filter(resa => {
-            if (resa.status === "en attente") return true;
-            if (resa.status === "refusé") {
-                if (!resa.refusedAt) return true;
-                const limit = new Date(resa.refusedAt);
-                limit.setDate(limit.getDate() + 7);
-                return now < limit;
-            }
-            if (resa.status === "validé") {
-                const sessionDateTime = new Date(`${resa.sessionDate} ${resa.sessionTime}`);
-                const limit = new Date(sessionDateTime);
-                limit.setDate(limit.getDate() + 7);
-                return now < limit;
-            }
-            return true;
-        });
-
-        fs.writeFileSync(FILE, JSON.stringify(filtered, null, 2));
-    } catch (e) {
-        console.error("Erreur nettoyage:", e);
-    }
-}
 
 // --- ROUTES ---
 
@@ -118,6 +90,20 @@ app.get("/api/reservation", (req, res) => {
   }
 
   res.json({ ok: true, reservations: result });
+});
+app.post("/api/supprimer", (req, res) => {
+  const { id } = req.body;
+
+  if (!id) return res.status(400).send("ID manquant");
+
+  const filePath = "./reservations.json";
+  const reservations = JSON.parse(fs.readFileSync(filePath, "utf8"));
+
+  const updated = reservations.filter(r => r.id !== id);
+
+  fs.writeFileSync(filePath, JSON.stringify(updated, null, 2));
+
+  res.send("Réservation supprimée");
 });
 
 
