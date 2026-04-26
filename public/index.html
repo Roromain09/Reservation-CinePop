@@ -696,6 +696,15 @@
         }
       }
 
+      // ⛔ Vérification côté client : nombre de personnes max 10
+      if (parseInt(data.peopleNumber) > 10) {
+        showLoading();
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        hideLoading();
+        showError("⛔ Le nombre de personnes est limité à 10 par réservation. Veuillez effectuer plusieurs réservations si nécessaire.");
+        return;
+      }
+
       showLoading();
 
       const delay = new Promise(resolve => setTimeout(resolve, 3000));
