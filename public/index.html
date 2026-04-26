@@ -688,6 +688,9 @@
       if (data.sessionDate && data.sessionTime) {
         const sessionDateTime = new Date(`${data.sessionDate}T${data.sessionTime}:00`);
         if (sessionDateTime < new Date()) {
+          showLoading();
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          hideLoading();
           showError("⛔ La date et l'heure de la séance sont déjà passées. Veuillez choisir une séance à venir.");
           return;
         }
