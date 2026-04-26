@@ -684,6 +684,15 @@
         sessionTime: document.getElementById("sessionTime").value
       };
 
+      // ⛔ Vérification côté client : séance déjà passée ?
+      if (data.sessionDate && data.sessionTime) {
+        const sessionDateTime = new Date(`${data.sessionDate}T${data.sessionTime}:00`);
+        if (sessionDateTime < new Date()) {
+          showError("⛔ La date et l'heure de la séance sont déjà passées. Veuillez choisir une séance à venir.");
+          return;
+        }
+      }
+
       showLoading();
 
       const delay = new Promise(resolve => setTimeout(resolve, 3000));
