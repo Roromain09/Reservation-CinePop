@@ -54,6 +54,22 @@ app.get("/", (req, res) => {
 
 // 📥 Créer réservation
 app.post("/api/reserver", (req, res) => {
+    const { sessionDate, sessionTime } = req.body;
+
+    // Vérification que la date/heure de séance n'est pas dépassée
+    if (sessionDate && sessionTime) {
+        const sessionDateTime = DateTime.fromFormat(
+            `${sessionDate} ${sessionTime}`,
+            "yyyy-MM-dd HH:mm",
+            { zone: "Europe/Paris" }
+        );
+        const now = DateTime.now().setZone("Europe/Paris");
+
+        if (!sessionDateTime.isValid || sessionDateTime < now) {
+            return res.status(400).send("La date et l'heure de la séance sont déjà passées. Impossible d'effectuer cette réservation.");
+        }
+    }
+
     const data = JSON.parse(fs.readFileSync(FILE));
     const newResa = {
         id: randomUUID(),
@@ -67,7 +83,26 @@ app.post("/api/reserver", (req, res) => {
 
 // 🖥️ Voir réservations (Admin)
 app.get("/api/admin", (req, res) => {
-    const data = JSON.parse(fs.readFileSync(FILE));
+    let data = JSON.parse(fs.readFileSync(FILE));
+    const now = DateTime.now().setZone("Europe/Paris");
+    let changed = false;
+
+    data = data.map(r => {
+        if (r.status === "en attente" && r.sessionDate && r.sessionTime) {
+            const sessionDateTime = DateTime.fromFormat(
+                `${r.sessionDate} ${r.sessionTime}`,
+                "yyyy-MM-dd HH:mm",
+                { zone: "Europe/Paris" }
+            );
+            if (sessionDateTime.isValid && sessionDateTime < now) {
+                changed = true;
+                return { ...r, status: "refusé", refusedAt: new Date(), autoRefused: true };
+            }
+        }
+        return r;
+    });
+
+    if (changed) fs.writeFileSync(FILE, JSON.stringify(data, null, 2));
     res.json(data);
 });
 // Check résa client 
@@ -115,6 +150,23 @@ app.post("/api/valider", async (req, res) => {
         const resa = data.find(r => r.id === id);
 
         if (!resa) return res.status(404).send("Réservation introuvable");
+
+        // Vérification que la séance n'est pas déjà passée
+        if (resa.sessionDate && resa.sessionTime) {
+            const sessionDateTime = DateTime.fromFormat(
+                `${resa.sessionDate} ${resa.sessionTime}`,
+                "yyyy-MM-dd HH:mm",
+                { zone: "Europe/Paris" }
+            );
+            const now = DateTime.now().setZone("Europe/Paris");
+            if (sessionDateTime.isValid && sessionDateTime < now) {
+                resa.status = "refusé";
+                resa.refusedAt = new Date();
+                resa.autoRefused = true;
+                fs.writeFileSync(FILE, JSON.stringify(data, null, 2));
+                return res.status(400).send("La séance est déjà passée. Validation impossible.");
+            }
+        }
 
         const BASE_URL = process.env.BASE_URL || "https://reservation-cinepop.onrender.com";
         const qrData = `${BASE_URL}/verify?id=${resa.id}`;
