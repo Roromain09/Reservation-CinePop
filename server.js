@@ -70,6 +70,11 @@ app.post("/api/reserver", (req, res) => {
         }
     }
 
+    // Vérification du nombre de personnes (max 10)
+    if (parseInt(req.body.peopleNumber) > 10) {
+        return res.status(400).send("Le nombre de personnes est limité à 10 par réservation.");
+    }
+
     const data = JSON.parse(fs.readFileSync(FILE));
     const newResa = {
         id: randomUUID(),
