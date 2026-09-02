@@ -442,6 +442,25 @@ function render(d, isPublic) {
         </div>
       </div>
     </div>`;
+const now_str = new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+
+  wrap.innerHTML = `
+    <a href="${backHref}" class="btn-back">${backLabel}</a>
+    ${hero}
+    <div class="state-card ${stateClass}">
+      ${publicBadge}
+      ${specialState ? "" : statusBadge}
+      <div class="state-icon-wrap">${iconHtml}</div>
+      <div class="state-label">${stateLabel}</div>
+      <div class="state-sublabel">${stateSub}</div>
+      ${specialState ? extraHtml : ""}
+      ${specialState ? "" : timeline}
+      ${specialState ? "" : extraHtml}
+      ${infoGrid}
+      <div style="margin-top:16px;text-align:right;font-size:0.7rem;color:var(--gris);opacity:0.6;">
+        Mis à jour à ${now_str}
+      </div>
+    </div>`;
 
   // ── TIMELINE ──
   function tlDot(step, activeClass) {
