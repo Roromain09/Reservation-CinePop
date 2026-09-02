@@ -28,7 +28,6 @@
       overflow-x: hidden;
     }
 
-    /* ── DÉCOR POPCORN ── */
     .bg-decor {
       position: fixed;
       inset: 0;
@@ -76,7 +75,6 @@
       50%       { transform: translateY(-12px); }
     }
 
-    /* ── NAV ── */
     nav {
       position: relative; z-index: 1;
       display: flex; align-items: center; justify-content: space-between;
@@ -120,10 +118,8 @@
       }
     }
 
-    /* ── LAYOUT ── */
     .wrap { position: relative; z-index: 1; max-width: 640px; margin: 0 auto; padding: 10px 24px; display: flex; flex-direction: column; gap: 20px; }
 
-    /* ── POSTER HERO ── */
     .poster-hero {
       position: relative; border-radius: 24px; overflow: hidden;
       min-height: 200px; display: flex; align-items: flex-end;
@@ -152,7 +148,6 @@
     .poster-hero-title { font-size: clamp(1.4rem, 5vw, 2rem); font-weight: 900; line-height: 1.1; margin-bottom: 6px; }
     .poster-hero-meta { color: var(--gris); font-size: 0.85rem; display: flex; gap: 14px; flex-wrap: wrap; }
 
-    /* ── ÉTAT CARD ── */
     .state-card {
       background: rgba(17, 34, 64, 0.78);
       border: 1px solid rgba(255,255,255,0.08);
@@ -170,23 +165,21 @@
     .state-card.state-annule::before  { background: linear-gradient(90deg, var(--rouge), #ffb3b3); }
     .state-card.state-refuse::before  { background: linear-gradient(90deg, var(--rouge), #ffb3b3); }
 
-    /* ── ICÔNE ÉTAT ── */
     .state-icon-wrap {
       width: 72px; height: 72px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
       font-size: 2rem; margin: 0 auto 20px; border: 2px solid;
     }
-    .state-prevu  .state-icon-wrap { background: rgba(167,179,209,0.1); border-color: rgba(167,179,209,0.3); }
+    .state-prevu   .state-icon-wrap { background: rgba(167,179,209,0.1); border-color: rgba(167,179,209,0.3); }
     .state-bientot .state-icon-wrap { background: rgba(245,183,0,0.12); border-color: rgba(245,183,0,0.4); box-shadow: 0 0 28px rgba(245,183,0,0.25); }
     .state-encours .state-icon-wrap { background: rgba(57,217,138,0.12); border-color: rgba(57,217,138,0.4); box-shadow: 0 0 28px rgba(57,217,138,0.2); }
     .state-termine .state-icon-wrap { background: rgba(255,140,102,0.12); border-color: rgba(255,140,102,0.35); }
     .state-annule  .state-icon-wrap { background: rgba(255,107,107,0.12); border-color: rgba(255,107,107,0.35); }
     .state-refuse  .state-icon-wrap { background: rgba(255,107,107,0.12); border-color: rgba(255,107,107,0.35); }
 
-    .state-label { text-align: center; font-size: 1.5rem; font-weight: 900; margin-bottom: 6px; }
+    .state-label    { text-align: center; font-size: 1.5rem; font-weight: 900; margin-bottom: 6px; }
     .state-sublabel { text-align: center; color: var(--gris); font-size: 0.92rem; line-height: 1.6; margin-bottom: 24px; }
 
-    /* ── TIMELINE ── */
     .timeline { display: flex; align-items: center; gap: 0; margin-bottom: 28px; }
     .tl-step { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
     .tl-dot {
@@ -209,7 +202,6 @@
     .tl-line { flex: 1; height: 2px; background: rgba(255,255,255,0.08); border-radius: 999px; margin-bottom: 20px; }
     .tl-line.done { background: var(--vert); }
 
-    /* ── BARRE PROGRESSION ── */
     .progress-section { margin-bottom: 24px; }
     .progress-label-row { display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--gris); margin-bottom: 8px; }
     .progress-label-row b { color: var(--blanc); }
@@ -219,7 +211,6 @@
     .fill-orange { background: linear-gradient(90deg, var(--orange), #ffb899); }
     .fill-jaune  { background: linear-gradient(90deg, var(--jaune), var(--jaune-soft)); box-shadow: 0 0 12px rgba(245,183,0,0.4); }
 
-    /* ── INFOS GRID ── */
     .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .info-cell {
       background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
@@ -228,7 +219,6 @@
     .info-cell-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--gris); margin-bottom: 4px; }
     .info-cell-value { font-size: 0.96rem; font-weight: 800; color: var(--blanc); }
 
-    /* ── COUNTDOWN ── */
     .countdown-block {
       background: rgba(245,183,0,0.08); border: 1px solid rgba(245,183,0,0.2);
       border-radius: 18px; padding: 20px 24px; text-align: center; margin-bottom: 20px;
@@ -237,7 +227,6 @@
     .countdown-value { font-size: 2.4rem; font-weight: 900; color: var(--jaune); letter-spacing: 1px; }
     .countdown-sub { font-size: 0.78rem; color: var(--gris); margin-top: 4px; }
 
-    /* ── BTN RETOUR ── */
     .btn-back {
       display: inline-flex; align-items: center; gap: 8px;
       padding: 12px 20px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1);
@@ -247,7 +236,6 @@
     }
     .btn-back:hover { background: rgba(255,255,255,0.09); color: var(--blanc); }
 
-    /* ── BADGE MODE PUBLIC ── */
     .public-badge {
       display: inline-flex; align-items: center; gap: 6px;
       padding: 6px 14px; border-radius: 999px;
@@ -256,7 +244,6 @@
       font-size: 0.78rem; font-weight: 700; margin-bottom: 20px;
     }
 
-    /* ── LOADING / ERROR ── */
     .loading-state .spin {
       width: 44px;
       aspect-ratio: 1;
@@ -270,7 +257,6 @@
     }
     @keyframes loader-spin { 100% { transform: rotate(1turn); } }
 
-    /* ── ANNULÉ / REFUSÉ ── */
     .alert-banner {
       padding: 14px 18px; border-radius: 16px; font-size: 0.9rem; line-height: 1.6;
       margin-bottom: 20px;
@@ -286,10 +272,7 @@
 </head>
 <body>
 
-<!-- ── DÉCOR POPCORN ── -->
 <div class="bg-decor" aria-hidden="true">
-
-  <!-- Seau popcorn haut droite -->
   <svg class="deco-bucket-1" viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg">
     <ellipse cx="30" cy="22" rx="9" ry="8" opacity="0.9"/>
     <ellipse cx="50" cy="14" rx="10" ry="9"/>
@@ -300,8 +283,6 @@
     <rect x="18" y="45" width="64" height="10" rx="3" fill="rgba(0,0,0,0.18)"/>
     <line x1="50" y1="55" x2="47" y2="115" stroke="rgba(0,0,0,0.12)" stroke-width="4"/>
   </svg>
-
-  <!-- Grain popcorn bas gauche -->
   <svg class="deco-grain-1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
     <ellipse cx="50" cy="50" rx="38" ry="30" transform="rotate(-20 50 50)"/>
     <ellipse cx="50" cy="50" rx="22" ry="18" transform="rotate(15 50 50)" fill="rgba(0,0,0,0.15)"/>
@@ -309,16 +290,12 @@
     <ellipse cx="65" cy="38" rx="12" ry="9"  transform="rotate(20 65 38)"/>
     <ellipse cx="50" cy="68" rx="13" ry="9"  transform="rotate(-10 50 68)"/>
   </svg>
-
-  <!-- Grain popcorn centre haut flottant -->
   <svg class="deco-grain-2" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
     <ellipse cx="50" cy="50" rx="36" ry="28" transform="rotate(10 50 50)"/>
     <ellipse cx="38" cy="38" rx="16" ry="11" transform="rotate(-20 38 38)"/>
     <ellipse cx="65" cy="42" rx="13" ry="9"  transform="rotate(25 65 42)"/>
     <ellipse cx="50" cy="65" rx="15" ry="10" transform="rotate(-5 50 65)"/>
   </svg>
-
-  <!-- Petit seau bas droit -->
   <svg class="deco-bucket-2" viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg">
     <ellipse cx="28" cy="24" rx="8" ry="7" opacity="0.9"/>
     <ellipse cx="50" cy="16" rx="9" ry="8"/>
@@ -327,22 +304,17 @@
     <rect x="18" y="45" width="64" height="10" rx="3" fill="rgba(0,0,0,0.18)"/>
     <line x1="50" y1="55" x2="47" y2="115" stroke="rgba(0,0,0,0.12)" stroke-width="4"/>
   </svg>
-
-  <!-- Grain haut gauche flottant -->
   <svg class="deco-grain-3" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
     <ellipse cx="50" cy="50" rx="40" ry="32" transform="rotate(-15 50 50)"/>
     <ellipse cx="35" cy="35" rx="18" ry="13" transform="rotate(-30 35 35)"/>
     <ellipse cx="68" cy="40" rx="14" ry="10" transform="rotate(20 68 40)"/>
     <ellipse cx="48" cy="67" rx="16" ry="11" transform="rotate(-8 48 67)"/>
   </svg>
-
-  <!-- Grain milieu droit flottant -->
   <svg class="deco-grain-4" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
     <ellipse cx="50" cy="50" rx="35" ry="27" transform="rotate(8 50 50)"/>
     <ellipse cx="38" cy="40" rx="15" ry="10" transform="rotate(-22 38 40)"/>
     <ellipse cx="64" cy="44" rx="12" ry="9"  transform="rotate(18 64 44)"/>
   </svg>
-
 </div>
 
 <nav>
@@ -368,7 +340,6 @@
 </div>
 
 <script>
-// ── UTILS ──
 function pad(n) { return String(n).padStart(2, "0"); }
 
 function formatDate(d) {
@@ -395,7 +366,6 @@ function estimateEndTime(startTime, durationMinutes) {
   return `${pad(Math.floor(totalMin / 60) % 24)}:${pad(totalMin % 60)}`;
 }
 
-// ── ÉTAT ──
 function computeState(seanceMs, durationMs, now) {
   const diff = seanceMs - now;
   if (diff > 15 * 60 * 1000)      return 1;
@@ -404,7 +374,6 @@ function computeState(seanceMs, durationMs, now) {
   return 4;
 }
 
-// ── RENDER ──
 function render(d, isPublic) {
   const wrap = document.getElementById("mainWrap");
 
@@ -440,25 +409,6 @@ function render(d, isPublic) {
           ${dureeHtml}
           ${d.roomNumber ? `<span>· ${d.roomNumber}</span>` : ""}
         </div>
-      </div>
-    </div>`;
-const now_str = new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-
-  wrap.innerHTML = `
-    <a href="${backHref}" class="btn-back">${backLabel}</a>
-    ${hero}
-    <div class="state-card ${stateClass}">
-      ${publicBadge}
-      ${specialState ? "" : statusBadge}
-      <div class="state-icon-wrap">${iconHtml}</div>
-      <div class="state-label">${stateLabel}</div>
-      <div class="state-sublabel">${stateSub}</div>
-      ${specialState ? extraHtml : ""}
-      ${specialState ? "" : timeline}
-      ${specialState ? "" : extraHtml}
-      ${infoGrid}
-      <div style="margin-top:16px;text-align:right;font-size:0.7rem;color:var(--gris);opacity:0.6;">
-        Mis à jour à ${now_str}
       </div>
     </div>`;
 
@@ -632,8 +582,9 @@ const now_str = new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute
     ? `<div class="public-badge">👁 Vue publique — aucune réservation liée</div>`
     : "";
 
-  const backHref = isPublic ? "/programme.html" : "/compte.html";
+  const backHref  = isPublic ? "/programme.html" : "/compte.html";
   const backLabel = isPublic ? "← Retour au programme" : "← Retour à mon compte";
+  const now_str   = new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 
   wrap.innerHTML = `
     <a href="${backHref}" class="btn-back">${backLabel}</a>
@@ -648,10 +599,12 @@ const now_str = new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute
       ${specialState ? "" : timeline}
       ${specialState ? "" : extraHtml}
       ${infoGrid}
+      <div style="margin-top:16px;text-align:right;font-size:0.7rem;color:var(--gris);opacity:0.6;">
+        Mis à jour à ${now_str}
+      </div>
     </div>`;
 }
 
-// ── INIT ──
 async function init() {
   const params   = new URLSearchParams(window.location.search);
   const resaId   = params.get("id");
